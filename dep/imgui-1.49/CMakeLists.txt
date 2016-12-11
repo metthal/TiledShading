@@ -1,0 +1,8 @@
+file(GLOB_RECURSE SOURCES *.cpp)
+add_library(imgui STATIC ${SOURCES})
+
+if(CMAKE_COMPILER_IS_GNUCC)
+    set_property(TARGET imgui APPEND_STRING PROPERTY COMPILE_FLAGS -W0)
+elseif(MSVC)
+    set_property(TARGET imgui APPEND_STRING PROPERTY COMPILE_FLAGS /W0)
+endif()
