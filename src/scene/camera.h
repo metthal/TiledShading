@@ -13,6 +13,15 @@ public:
 
 	glm::mat4 getViewTransform() const;
 
+	void moveForwards(float step);
+	void moveBackwards(float step);
+	void strafeLeft(float step);
+	void strafeRight(float right);
+	void turnLeft(float angle);
+	void turnRight(float angle);
+	void turnUp(float angle);
+	void turnDown(float angle);
+
 private:
 	glm::vec3 _position;
 	glm::vec3 _direction;

@@ -7,18 +7,26 @@ include_directories(
     SYSTEM ${SDL2_INCLUDE_DIR}
     SYSTEM ${IMGUI_INCLUDE_DIR}
     SYSTEM ${GLM_INCLUDE_DIR}
+    SYSTEM ${ASSIMP_INCLUDE_DIR}
 )
 
 add_executable(TiledShading ${SOURCES})
-target_link_libraries(TiledShading ${OPENGL_gl_LIBRARY} ${GLEW_LIBRARY} ${SDL2_LIBRARY} imgui)
+target_link_libraries(TiledShading ${OPENGL_gl_LIBRARY} ${GLEW_LIBRARY} ${SDL2_LIBRARY} ${ASSIMP_LIBRARY} imgui)
+
+add_custom_target(
+    always_copy_resources ALL
+    DEPENDS COPY_RESOURCES
+)
 
 if(MSVC)
     add_custom_command(
-        TARGET TiledShading
-        POST_BUILD
+        OUTPUT COPY_RESOURCES
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GLEW_RUNTIME_LIBRARY} $<TARGET_FILE_DIR:TiledShading>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SDL2_RUNTIME_LIBRARY} $<TARGET_FILE_DIR:TiledShading>
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_DIR} $<TARGET_FILE_DIR:TiledShading>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ASSIMP_RUNTIME_LIBRARY} $<TARGET_FILE_DIR:TiledShading>
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODELS_DIR} $<TARGET_FILE_DIR:TiledShading>/models
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_DIR} $<TARGET_FILE_DIR:TiledShading>/shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${TEXTURES_DIR} $<TARGET_FILE_DIR:TiledShading>/textures
     )
     
     subdirlist(DIRS ${CMAKE_CURRENT_SOURCE_DIR})
@@ -28,9 +36,10 @@ if(MSVC)
     endforeach()
 else()
     add_custom_command(
-        TARGET TiledShading
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADERS_DIR} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        OUTPUT COPY_RESOURCES
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODELS_DIR} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_DIR} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${TEXTURES_DIR} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
 endif()
 

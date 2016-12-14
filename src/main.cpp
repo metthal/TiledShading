@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <assimp/scene.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -8,6 +9,7 @@
 #include "scene/camera.h"
 #include "shaders/shader.h"
 #include "shaders/shader_program.h"
+#include "mesh/mesh.h"
 
 int main(int argc, char** argv)
 {
@@ -42,19 +44,21 @@ int main(int argc, char** argv)
 
 	glClearColor(0.13f, 0.0f, 0.31f, 1.0f);
 
-	auto vertShader = Shader::loadVertexShader("vs.vert");
+	auto vertShader = Shader::loadVertexShader("shaders/vs.vert");
 	if (!vertShader)
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", vertShader.getError().c_str(), window);
 		return 1;
 	}
 
-	auto fragShader = Shader::loadFragmentShader("fs.frag");
+	auto fragShader = Shader::loadFragmentShader("shaders/fs.frag");
 	if (!fragShader)
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", fragShader.getError().c_str(), window);
 		return 1;
 	}
+
+	Camera camera({ 5.0f, 10.0f, 0.0f }, { 0.0f, 0.0f, 0.0f });
 
 	auto program = ShaderProgram::link(vertShader, fragShader);
 	if (!program)
@@ -62,35 +66,12 @@ int main(int argc, char** argv)
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", program.getError().c_str(), window);
 		return 1;
 	}
+
+	glEnable(GL_DEPTH_TEST);
+
 	program.use();
-
-	GLuint vao;
-	glCreateVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	std::vector<float> square
-	{
-		-0.5, -0.5, 0.0,
-		0.5, 0.5, 0.0,
-		-0.5, 0.5, 0.0,
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
-		0.5, 0.5, 0.0
-	};
-
-	GLuint vbo;
-	glCreateBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, square.size() * sizeof(float), square.data(), GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexArrayAttrib(vao, 0);
-
-	Camera camera({ 0.1f, 0.0f, -0.8f }, { 0.0f, 0.0f, 0.0f });
-	auto mvp = camera.getViewTransform();
-
 	auto mvpUniform = glGetUniformLocation(program.getId(), "mvp");
-	glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
+	auto bunny = Mesh::loadFromFile("models/bunny.obj");
 
 	bool running = true;
 	while (running)
@@ -103,14 +84,44 @@ int main(int argc, char** argv)
 				case SDL_QUIT:
 					running = false;
 					break;
+				case SDL_KEYDOWN:
+				{
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_w:
+							camera.moveForwards(0.1f);
+							break;
+						case SDLK_s:
+							camera.moveBackwards(0.1f);
+							break;
+						case SDLK_a:
+							camera.strafeLeft(0.1f);
+							break;
+						case SDLK_d:
+							camera.strafeRight(0.1f);
+							break;
+					}
+					break;
+				}
+				case SDL_MOUSEMOTION:
+				{
+					if (event.motion.state & SDL_BUTTON_RMASK)
+					{
+						camera.turnRight(event.motion.xrel * M_PI / 180.0f);
+						camera.turnDown(event.motion.yrel * M_PI / 180.0f);
+					}
+					break;
+				}
 				default:
 					break;
 			}
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		program.use();
+		glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(camera.getViewTransform()));
+		bunny.render();
 
 		SDL_GL_SwapWindow(window);
 	}
