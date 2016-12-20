@@ -3,6 +3,7 @@
 #include <assimp/scene.h>
 
 #include "mesh/mesh.h"
+#include "shaders/shader_program.h"
 
 Mesh::Mesh(const std::vector<glm::vec3>& vertices, const std::vector<std::uint32_t>& indices, const std::vector<glm::vec3>& normals)
 	: _vertices(vertices), _indices(indices), _normals(normals)
@@ -76,6 +77,7 @@ std::size_t Mesh::getNumberOfIndices() const
 void Mesh::render()
 {
 	glBindVertexArray(_vao);
+
 	if (_indices.empty())
 		glDrawArrays(GL_TRIANGLES, 0, _vertices.size() * 3);
 	else
@@ -108,8 +110,9 @@ void Mesh::init()
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(0));
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
-	glEnableVertexArrayAttrib(_vao, 0);
-	glEnableVertexArrayAttrib(_vao, 1);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

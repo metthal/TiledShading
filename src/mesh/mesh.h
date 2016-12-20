@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 
+class ShaderProgram;
+
 class Mesh
 {
 public:
