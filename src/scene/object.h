@@ -14,12 +14,16 @@ public:
 
 	const glm::vec3& getPosition() const;
 	const std::shared_ptr<Mesh>& getMesh() const;
+	float getScale() const;
+
+	void setScale(float scale);
 
 	glm::mat4 getTransform() const;
 
 private:
 	glm::vec3 _position;
 	std::shared_ptr<Mesh> _mesh;
+	float _scale;
 };
 
 #endif
