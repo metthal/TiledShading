@@ -227,9 +227,15 @@ int main(int argc, char** argv)
 	}
 
 	auto bunnyMesh = Mesh::load("models/bunny.obj");
-	window.getScene()->setCamera(std::make_shared<Camera>(glm::vec3{ 0.0f, 3.0f, 5.0f }, glm::vec3{ 0.0f, 0.0f, 0.0f }, 60.0f, 800.0f / 600.0f));
+	auto floorMesh = Mesh::load("models/floor.obj");
+
+	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, -1.0f, 0.0f }, floorMesh);
+	floor->setScale(10.0f);
+
+	window.getScene()->setCamera(std::make_shared<Camera>(glm::vec3{ -5.0f, 0.0f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 0.0f }, 60.0f, 800.0f / 600.0f));
 	window.getScene()->addObject(std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, bunnyMesh));
-	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ 10.0f, 10.0f, 0.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
+	window.getScene()->addObject(floor);
+	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ -5.0f, 0.0f, 0.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
 
 	window.gameLoop();
 	return 0;
