@@ -18,12 +18,12 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &_vao);
 }
 
-Mesh Mesh::loadFromFile(const std::string& fileName)
+std::shared_ptr<Mesh> Mesh::load(const std::string& fileName)
 {
 	Assimp::Importer importer;
 	auto scene = importer.ReadFile(fileName.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 	if (!scene)
-		return {{}, {}, {}};
+		return nullptr;
 
 	auto mesh = scene->mMeshes[0];
 	std::vector<glm::vec3> vertices;
@@ -51,7 +51,7 @@ Mesh Mesh::loadFromFile(const std::string& fileName)
 		}
 	}
 
-	return { vertices, indices, normals };
+	return std::make_shared<Mesh>(vertices, indices, normals);
 }
 
 GLuint Mesh::getVertexId() const
@@ -79,11 +79,13 @@ void Mesh::render()
 	glBindVertexArray(_vao);
 
 	if (_indices.empty())
-		glDrawArrays(GL_TRIANGLES, 0, _vertices.size() * 3);
+	{
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_vertices.size() * 3));
+	}
 	else
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-		glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, reinterpret_cast<const void*>(0));
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, reinterpret_cast<const void*>(0));
 	}
 }
 
@@ -93,10 +95,7 @@ void Mesh::init()
 	glBindVertexArray(_vao);
 
 	glGenBuffers(1, &_vbo);
-	glGenBuffers(1, &_ebo);
-
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
 
 	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * 2 * 3 * sizeof(float), nullptr, GL_STATIC_DRAW);
 	auto buffer = static_cast<glm::vec3*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
@@ -106,7 +105,6 @@ void Mesh::init()
 		buffer[2 * i + 1] = _normals[i];
 	}
 	glUnmapBuffer(GL_ARRAY_BUFFER);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(std::uint32_t), _indices.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(0));
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
@@ -114,7 +112,14 @@ void Mesh::init()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
+	if (!_indices.empty())
+	{
+		glGenBuffers(1, &_ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(std::uint32_t), _indices.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }

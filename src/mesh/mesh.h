@@ -1,6 +1,8 @@
 #ifndef TILED_SHADING_MESH_MESH_H
 #define TILED_SHADING_MESH_MESH_H
 
+#include <memory>
+#include <tuple>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -14,7 +16,7 @@ public:
 	Mesh(const std::vector<glm::vec3>& vertices, const std::vector<std::uint32_t>& indices, const std::vector<glm::vec3>& normals);
 	~Mesh();
 
-	static Mesh loadFromFile(const std::string& fileName);
+	static std::shared_ptr<Mesh> load(const std::string& fileName);
 
 	GLuint getVertexId() const;
 	GLuint getIndexId() const;

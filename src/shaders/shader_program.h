@@ -2,37 +2,49 @@
 #define TILED_SHADING_SHADER_PROGRAM_H
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 
 #include "shaders/shader.h"
+
+struct UniformInfo
+{
+	GLint id;
+	bool array;
+};
 
 class ShaderProgram
 {
 public:
-	ShaderProgram(GLuint id, std::vector<std::unique_ptr<Shader>>&& shaders);
-	ShaderProgram(const std::string& error);
+	ShaderProgram(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaders);
 	~ShaderProgram();
 
 	template <typename... Shaders>
-	static std::unique_ptr<ShaderProgram> link(Shaders&&... shaders)
+	static std::shared_ptr<ShaderProgram> link(std::string& error, const Shaders&... shaders)
 	{
 		auto id = glCreateProgram();
-		std::vector<std::unique_ptr<Shader>> shaderPtrs;
-		return linkImpl(id, std::move(shaderPtrs), std::forward<Shaders>(shaders)...);
+		std::vector<std::shared_ptr<Shader>> shaderPtrs;
+		return linkImpl(id, std::move(shaderPtrs), error, shaders...);
 	}
 
-	operator bool() const;
+	void activate();
+	void deactivate();
 
 	GLuint getId() const;
 	GLint getNumberOfAttributes() const;
-	const std::string& getError() const;
+	GLint getNumberOfUniforms() const;
+	GLint getUniformId(const std::string& name) const;
 
-	void use();
+	void setUniform(const std::string& name, GLint value);
+	void setUniform(const std::string& name, const glm::vec3& v);
+	void setUniform(const std::string& name, const glm::mat4& m);
+	void setUniform(const std::string& name, const std::vector<glm::vec3>& v);
 
 private:
-	static std::unique_ptr<ShaderProgram> linkImpl(GLuint id, std::vector<std::unique_ptr<Shader>>&& shaderPtrs)
+	static std::shared_ptr<ShaderProgram> linkImpl(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaderPtrs, std::string& error)
 	{
 		glLinkProgram(id);
 
@@ -47,26 +59,27 @@ private:
 			std::vector<GLchar> errorData(linkErrorLength);
 			glGetProgramInfoLog(id, linkErrorLength, &ret, errorData.data());
 
-			return std::make_unique<ShaderProgram>(std::string(errorData.begin(), errorData.end()));
+			error = std::string(errorData.begin(), errorData.end());
+			return nullptr;
 		}
 
-		return std::make_unique<ShaderProgram>(id, std::move(shaderPtrs));
+		return std::make_shared<ShaderProgram>(id, std::move(shaderPtrs));
 	}
 
 	template <typename... Shaders>
-	static std::unique_ptr<ShaderProgram> linkImpl(GLuint id, std::vector<std::unique_ptr<Shader>>&& shaderPtrs, std::unique_ptr<Shader>&& shader, Shaders&&... shaders)
+	static std::shared_ptr<ShaderProgram> linkImpl(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaderPtrs, std::string& error,
+		const std::shared_ptr<Shader>& shader, const Shaders&... shaders)
 	{
 		glAttachShader(id, shader->getId());
 		shaderPtrs.push_back(std::move(shader));
-		return linkImpl(id, std::move(shaderPtrs), std::forward<Shaders>(shaders)...);
+		return linkImpl(id, std::move(shaderPtrs), error, shaders...);
 	}
-
-	void init();
 
 	GLuint _id;
 	GLint _numAttributes;
-	std::vector<std::unique_ptr<Shader>> _shaders;
-	std::string _error;
+	GLint _numUniforms;
+	std::vector<std::shared_ptr<Shader>> _shaders;
+	std::unordered_map<std::string, UniformInfo> _uniforms;
 };
 
 #endif
