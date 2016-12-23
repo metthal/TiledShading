@@ -236,6 +236,7 @@ int main(int argc, char** argv)
 	window.getScene()->addObject(std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, bunnyMesh));
 	window.getScene()->addObject(floor);
 	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ -5.0f, 0.0f, 0.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
+	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ 5.0f, 0.0f, 0.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }));
 
 	window.gameLoop();
 	return 0;

@@ -4,7 +4,8 @@ uniform sampler2D gbufferPos;
 uniform sampler2D gbufferNormal;
 uniform sampler2D gbufferAlbedo;
 uniform int lightsCount;
-uniform vec3 lights[32];
+uniform vec3 lightsPos[32];
+uniform vec3 lightsIntensity[32];
 
 out vec3 outColor;
 
@@ -15,5 +16,8 @@ void main()
     vec3 pos = texture(gbufferPos, fragCoord).xyz;
     vec3 normal = texture(gbufferNormal, fragCoord).xyz;
     vec3 albedo = texture(gbufferAlbedo, fragCoord).xyz;
-    outColor = max(0.0, dot(normal, normalize(lights[0] - pos))) * albedo * vec3(1,0,0);
+
+    outColor = vec3(0,0,0);
+    for (int i = 0; i < lightsCount; i++)
+        outColor += max(0.0, dot(normal, normalize(lightsPos[i] - pos))) * albedo * lightsIntensity[i];
 }

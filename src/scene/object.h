@@ -15,8 +15,10 @@ public:
 	const glm::vec3& getPosition() const;
 	const std::shared_ptr<Mesh>& getMesh() const;
 	float getScale() const;
+	const glm::vec3& getColor() const;
 
 	void setScale(float scale);
+	void setColor(const glm::vec3& color);
 
 	glm::mat4 getTransform() const;
 
@@ -24,6 +26,7 @@ private:
 	glm::vec3 _position;
 	std::shared_ptr<Mesh> _mesh;
 	float _scale;
+	glm::vec3 _color;
 };
 
 #endif

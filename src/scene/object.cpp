@@ -2,7 +2,7 @@
 
 #include "scene/object.h"
 
-Object::Object(const glm::vec3& position, const std::shared_ptr<Mesh>& mesh) : _position(position), _mesh(mesh), _scale(1.0f)
+Object::Object(const glm::vec3& position, const std::shared_ptr<Mesh>& mesh) : _position(position), _mesh(mesh), _scale(1.0f), _color(1.0f, 1.0f, 1.0f)
 {
 }
 
@@ -19,6 +19,11 @@ const std::shared_ptr<Mesh>& Object::getMesh() const
 float Object::getScale() const
 {
 	return _scale;
+}
+
+const glm::vec3& Object::getColor() const
+{
+	return _color;
 }
 
 void Object::setScale(float scale)

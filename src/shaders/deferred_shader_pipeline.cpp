@@ -42,9 +42,12 @@ void DeferredShaderPipeline::run(const Scene* scene)
 {
 	auto camera = scene->getCamera();
 
-	std::vector<glm::vec3> lights;
+	std::vector<glm::vec3> lightsPos, lightsIntensity;
 	for (const auto& light : scene->getLights())
-		lights.push_back(light->getPosition());
+	{
+		lightsPos.push_back(light->getPosition());
+		lightsIntensity.push_back(light->getIntensity());
+	}
 
 	_gbuffer->activate();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -53,6 +56,7 @@ void DeferredShaderPipeline::run(const Scene* scene)
 	for (const auto& object : *scene)
 	{
 		_geometryPass->setUniform("model", object->getTransform());
+		_geometryPass->setUniform("objectColor", object->getColor());
 		object->getMesh()->render();
 	}
 
@@ -65,7 +69,8 @@ void DeferredShaderPipeline::run(const Scene* scene)
 	_lightPass->setUniform("gbufferNormal", _gbuffer->getNormalTextureUnit());
 	_lightPass->setUniform("gbufferAlbedo", _gbuffer->getAlbedoTextureUnit());
 	_lightPass->setUniform("lightsCount", static_cast<GLint>(scene->getNumberOfLights()));
-	_lightPass->setUniform("lights", lights);
+	_lightPass->setUniform("lightsPos", lightsPos);
+	_lightPass->setUniform("lightsIntensity", lightsIntensity);
 	for (const auto& object : *scene)
 	{
 		_lightPass->setUniform("model", object->getTransform());

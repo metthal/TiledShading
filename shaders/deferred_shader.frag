@@ -1,5 +1,7 @@
 #version 430 core
 
+uniform vec3 objectColor;
+
 layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec3 inNormal;
 
@@ -11,5 +13,5 @@ void main()
 {
     outPos = inPos;
     outNormal = normalize(inNormal);
-    outAlbedo = vec3(1, 1, 1);
+    outAlbedo = objectColor;
 }
