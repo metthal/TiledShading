@@ -12,7 +12,7 @@ class DeferredShaderPipeline : public Pipeline
 {
 public:
 	virtual bool init(const Window* window, std::string& error) override;
-	virtual void run(const Scene* scene) override;
+	virtual void run(const Window* window) override;
 
 private:
 	std::shared_ptr<GBuffer> _gbuffer;

@@ -4,11 +4,13 @@
 #include <memory>
 #include <string>
 
-#include <SDL.h>
 #include <glm/glm.hpp>
+#include <imgui.h>
+#include <SDL.h>
 
 #include "scene/scene.h"
 #include "shaders/pipeline.h"
+#include "shaders/imgui_pipeline.h"
 
 struct OpenGLConfig
 {
@@ -30,8 +32,10 @@ public:
 	bool init(const OpenGLConfig& config, std::string& error);
 	void gameLoop();
 
+	SDL_Window* getImpl() const;
 	const glm::ivec2& getDimensions() const;
 	Scene* getScene();
+	const Scene* getScene() const;
 
 	bool addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string& error);
 	void switchPipeline(std::size_t index);
@@ -45,6 +49,7 @@ private:
 	glm::ivec2 _dimensions;
 	Scene _scene;
 	std::vector<std::shared_ptr<Pipeline>> _pipelines;
+	ImguiPipeline _imguiPipeline;
 
 	SDL_Window* _impl;
 	SDL_GLContext _glContext;

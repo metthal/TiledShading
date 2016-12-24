@@ -13,7 +13,34 @@ Shader::~Shader()
 	glDeleteShader(_id);
 }
 
-std::shared_ptr<Shader> Shader::load(const std::string& shaderName, std::string& error)
+std::shared_ptr<Shader> Shader::loadString(GLuint type, const std::string& shaderSource, std::string& error)
+{
+	auto contentSources = shaderSource.c_str();
+	auto contentLengths = static_cast<GLint>(shaderSource.length());
+
+	auto id = glCreateShader(type);
+	glShaderSource(id, 1, &contentSources, &contentLengths);
+	glCompileShader(id);
+
+	GLint compileStatus;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);
+	if (compileStatus == GL_FALSE)
+	{
+		GLint compileErrorLength;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &compileErrorLength);
+
+		GLint ret;
+		std::vector<GLchar> errorData(compileErrorLength);
+		glGetShaderInfoLog(id, compileErrorLength, &ret, errorData.data());
+
+		error = std::string(errorData.begin(), errorData.end());
+		return nullptr;
+	}
+
+	return std::make_shared<Shader>(type, id);
+}
+
+std::shared_ptr<Shader> Shader::loadFile(const std::string& shaderName, std::string& error)
 {
 	auto fileName = "shaders/" + shaderName;
 	GLuint type;
@@ -38,29 +65,7 @@ std::shared_ptr<Shader> Shader::load(const std::string& shaderName, std::string&
 	while (std::getline(file, line))
 		content += line + '\n';
 
-	auto contentSources = content.c_str();
-	auto contentLengths = static_cast<GLint>(content.length());
-
-	auto id = glCreateShader(type);
-	glShaderSource(id, 1, &contentSources, &contentLengths);
-	glCompileShader(id);
-
-	GLint compileStatus;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);
-	if (compileStatus == GL_FALSE)
-	{
-		GLint compileErrorLength;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &compileErrorLength);
-
-		GLint ret;
-		std::vector<GLchar> errorData(compileErrorLength);
-		glGetShaderInfoLog(id, compileErrorLength, &ret, errorData.data());
-
-		error = std::string(errorData.begin(), errorData.end());
-		return nullptr;
-	}
-
-	return std::make_shared<Shader>(type, id);
+	return Shader::loadString(type, content, error);
 }
 
 std::uint32_t Shader::getType() const

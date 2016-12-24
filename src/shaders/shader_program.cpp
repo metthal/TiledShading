@@ -1,15 +1,31 @@
+#include <iostream>
+
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shaders/shader_program.h"
 #include "utils/utils.h"
 
-ShaderProgram::ShaderProgram(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaders) : _id(id), _numAttributes(0), _shaders(std::move(shaders))
+ShaderProgram::ShaderProgram(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaders) : _id(id), _numAttributes(0), _numUniforms(0), _shaders(std::move(shaders))
 {
 	glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &_numAttributes);
 	glGetProgramiv(_id, GL_ACTIVE_UNIFORMS, &_numUniforms);
 
-	GLint maxUniformNameLength;
+	GLint maxAttributeNameLength, maxUniformNameLength;
+	glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
 	glGetProgramiv(_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
+
+	for (int i = 0; i < _numAttributes; ++i)
+	{
+		GLsizei attributeNameLength;
+		GLint attributeSize;
+		GLenum attributeType;
+		std::vector<char> attributeNameBuffer(maxAttributeNameLength);
+		glGetActiveAttrib(_id, i, maxAttributeNameLength, &attributeNameLength, &attributeSize, &attributeType, attributeNameBuffer.data());
+
+		auto attributeName = std::string(attributeNameBuffer.begin(), attributeNameBuffer.begin() + attributeNameLength);
+		std::cout << "Attrib: " << attributeName << " " << i << std::endl;
+		_attributes.emplace(attributeName, AttributeInfo{ glGetAttribLocation(_id, attributeName.c_str()) });
+	}
 
 	for (int i = 0; i < _numUniforms; ++i)
 	{
@@ -60,6 +76,15 @@ GLint ShaderProgram::getNumberOfAttributes() const
 GLint ShaderProgram::getNumberOfUniforms() const
 {
 	return _numUniforms;
+}
+
+GLint ShaderProgram::getAttributeId(const std::string& name) const
+{
+	auto itr = _attributes.find(name);
+	if (itr == _attributes.end())
+		return -1;
+
+	return itr->second.id;
 }
 
 GLint ShaderProgram::getUniformId(const std::string& name) const

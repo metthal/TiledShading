@@ -10,6 +10,11 @@
 
 #include "shaders/shader.h"
 
+struct AttributeInfo
+{
+	GLint id;
+};
+
 struct UniformInfo
 {
 	GLint id;
@@ -36,6 +41,7 @@ public:
 	GLuint getId() const;
 	GLint getNumberOfAttributes() const;
 	GLint getNumberOfUniforms() const;
+	GLint getAttributeId(const std::string& name) const;
 	GLint getUniformId(const std::string& name) const;
 
 	void setUniform(const std::string& name, GLint value);
@@ -80,6 +86,7 @@ private:
 	GLint _numAttributes;
 	GLint _numUniforms;
 	std::vector<std::shared_ptr<Shader>> _shaders;
+	std::unordered_map<std::string, AttributeInfo> _attributes;
 	std::unordered_map<std::string, UniformInfo> _uniforms;
 };
 

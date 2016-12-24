@@ -1,5 +1,9 @@
 #include <iostream>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+
 #include "window/window.h"
 
 namespace {
@@ -12,7 +16,7 @@ void __stdcall openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 }
 
 Window::Window(const std::string& title, const glm::ivec2& dimensions)
-	: _title(title), _dimensions(dimensions), _scene(), _pipelines(), _impl(nullptr), _glContext(nullptr), _currentPipeline(nullptr)
+	: _title(title), _dimensions(dimensions), _scene(), _pipelines(), _imguiPipeline(), _impl(nullptr), _glContext(nullptr), _currentPipeline(nullptr)
 {
 }
 
@@ -70,6 +74,10 @@ bool Window::init(const OpenGLConfig& config, std::string& error)
 	}
 
 	glClearColor(config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f);
+
+	if (!_imguiPipeline.init(this, error))
+		return false;
+
 	return true;
 }
 
@@ -90,10 +98,16 @@ void Window::gameLoop()
 			handleEvent(event);
 		}
 
-		_currentPipeline->run(&_scene);
+		_currentPipeline->run(this);
+		_imguiPipeline.run(this);
 
 		SDL_GL_SwapWindow(_impl);
 	}
+}
+
+SDL_Window* Window::getImpl() const
+{
+	return _impl;
 }
 
 const glm::ivec2& Window::getDimensions() const
@@ -102,6 +116,11 @@ const glm::ivec2& Window::getDimensions() const
 }
 
 Scene* Window::getScene()
+{
+	return &_scene;
+}
+
+const Scene* Window::getScene() const
 {
 	return &_scene;
 }

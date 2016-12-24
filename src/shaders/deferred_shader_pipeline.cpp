@@ -10,19 +10,19 @@ bool DeferredShaderPipeline::init(const Window* window, std::string& error)
 		return false;
 	}
 
-	auto geometryVs = Shader::load("deferred_shader_geo_pass.vert", error);
+	auto geometryVs = Shader::loadFile("deferred_shader_geo_pass.vert", error);
 	if (!geometryVs)
 		return false;
 
-	auto geometryFs = Shader::load("deferred_shader_geo_pass.frag", error);
+	auto geometryFs = Shader::loadFile("deferred_shader_geo_pass.frag", error);
 	if (!geometryFs)
 		return false;
 
-	auto lightVs = Shader::load("deferred_shader_light_pass.vert", error);
+	auto lightVs = Shader::loadFile("deferred_shader_light_pass.vert", error);
 	if (!lightVs)
 		return false;
 
-	auto lightFs = Shader::load("deferred_shader_light_pass.frag", error);
+	auto lightFs = Shader::loadFile("deferred_shader_light_pass.frag", error);
 	if (!lightFs)
 		return false;
 
@@ -44,8 +44,9 @@ bool DeferredShaderPipeline::init(const Window* window, std::string& error)
 	return true;
 }
 
-void DeferredShaderPipeline::run(const Scene* scene)
+void DeferredShaderPipeline::run(const Window* window)
 {
+	auto scene = window->getScene();
 	auto camera = scene->getCamera();
 
 	std::vector<glm::vec3> lightsPos, lightsIntensity;
