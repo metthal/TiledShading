@@ -3,19 +3,26 @@
 
 bool DeferredShaderPipeline::init(std::string& error)
 {
-	auto geometryVs = Shader::load("shaders/deferred_shader_geo_pass.vert", error);
+	_fullScreenQuad = Mesh::load("quad.obj");
+	if (_fullScreenQuad == nullptr)
+	{
+		error = "Unable to load fullscreen quad";
+		return false;
+	}
+
+	auto geometryVs = Shader::load("deferred_shader_geo_pass.vert", error);
 	if (!geometryVs)
 		return false;
 
-	auto geometryFs = Shader::load("shaders/deferred_shader_geo_pass.frag", error);
+	auto geometryFs = Shader::load("deferred_shader_geo_pass.frag", error);
 	if (!geometryFs)
 		return false;
 
-	auto lightVs = Shader::load("shaders/deferred_shader_light_pass.vert", error);
+	auto lightVs = Shader::load("deferred_shader_light_pass.vert", error);
 	if (!lightVs)
 		return false;
 
-	auto lightFs = Shader::load("shaders/deferred_shader_light_pass.frag", error);
+	auto lightFs = Shader::load("deferred_shader_light_pass.frag", error);
 	if (!lightFs)
 		return false;
 
@@ -32,7 +39,6 @@ bool DeferredShaderPipeline::init(std::string& error)
 		return false;
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 	return true;
@@ -51,6 +57,7 @@ void DeferredShaderPipeline::run(const Scene* scene)
 		lightsAttenuation.push_back(light->getAttenuation());
 	}
 
+	glEnable(GL_CULL_FACE);
 	_gbuffer->activate();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	_geometryPass->activate();
@@ -62,11 +69,11 @@ void DeferredShaderPipeline::run(const Scene* scene)
 		object->getMesh()->render();
 	}
 
+	glDisable(GL_CULL_FACE);
 	_gbuffer->deactivate();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	_lightPass->activate();
 	_gbuffer->activateTextures();
-	_lightPass->setUniform("viewProject", camera->getViewTransform());
 	_lightPass->setUniform("gbufferPos", _gbuffer->getPositionTextureUnit());
 	_lightPass->setUniform("gbufferNormal", _gbuffer->getNormalTextureUnit());
 	_lightPass->setUniform("gbufferAlbedo", _gbuffer->getAlbedoTextureUnit());
@@ -74,9 +81,5 @@ void DeferredShaderPipeline::run(const Scene* scene)
 	_lightPass->setUniform("lightsPos", lightsPos);
 	_lightPass->setUniform("lightsIntensity", lightsIntensity);
 	_lightPass->setUniform("lightsAttenuation", lightsAttenuation);
-	for (const auto& object : *scene)
-	{
-		_lightPass->setUniform("model", object->getTransform());
-		object->getMesh()->render();
-	}
+	_fullScreenQuad->render();
 }

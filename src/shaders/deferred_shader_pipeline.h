@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "framebuffer/g_buffer.h"
+#include "mesh/mesh.h"
 #include "shaders/pipeline.h"
 #include "shaders/shader_program.h"
 
@@ -17,6 +18,7 @@ private:
 	std::shared_ptr<GBuffer> _gbuffer;
 	std::shared_ptr<ShaderProgram> _geometryPass;
 	std::shared_ptr<ShaderProgram> _lightPass;
+	std::shared_ptr<Mesh> _fullScreenQuad;
 };
 
 #endif

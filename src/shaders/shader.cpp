@@ -13,8 +13,9 @@ Shader::~Shader()
 	glDeleteShader(_id);
 }
 
-std::shared_ptr<Shader> Shader::load(const std::string& fileName, std::string& error)
+std::shared_ptr<Shader> Shader::load(const std::string& shaderName, std::string& error)
 {
+	auto fileName = "shaders/" + shaderName;
 	GLuint type;
 	if (endsWith(fileName, ".vert"))
 		type = GL_VERTEX_SHADER;
