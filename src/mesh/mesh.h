@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -33,6 +34,8 @@ private:
 	std::vector<glm::vec3> _normals;
 	GLuint _vao;
 	GLuint _vbo, _ebo;
+
+	static std::unordered_map<std::string, std::shared_ptr<Mesh>> loadedMeshes;
 };
 
 #endif

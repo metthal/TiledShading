@@ -5,6 +5,8 @@
 #include "mesh/mesh.h"
 #include "shaders/shader_program.h"
 
+std::unordered_map<std::string, std::shared_ptr<Mesh>> Mesh::loadedMeshes;
+
 Mesh::Mesh(const std::vector<glm::vec3>& vertices, const std::vector<std::uint32_t>& indices, const std::vector<glm::vec3>& normals)
 	: _vertices(vertices), _indices(indices), _normals(normals)
 {
@@ -18,8 +20,13 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &_vao);
 }
 
-std::shared_ptr<Mesh> Mesh::load(const std::string& fileName)
+std::shared_ptr<Mesh> Mesh::load(const std::string& modelName)
 {
+	auto itr = Mesh::loadedMeshes.find(modelName);
+	if (itr != Mesh::loadedMeshes.end())
+		return itr->second;
+
+	auto fileName = "models/" + modelName;
 	Assimp::Importer importer;
 	auto scene = importer.ReadFile(fileName.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 	if (!scene)
@@ -51,7 +58,8 @@ std::shared_ptr<Mesh> Mesh::load(const std::string& fileName)
 		}
 	}
 
-	return std::make_shared<Mesh>(vertices, indices, normals);
+	auto insertItr = Mesh::loadedMeshes.emplace(modelName, std::make_shared<Mesh>(vertices, indices, normals));
+	return (insertItr.first)->second;
 }
 
 GLuint Mesh::getVertexId() const

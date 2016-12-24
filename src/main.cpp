@@ -226,8 +226,8 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	auto bunnyMesh = Mesh::load("models/bunny.obj");
-	auto floorMesh = Mesh::load("models/floor.obj");
+	auto bunnyMesh = Mesh::load("bunny.obj");
+	auto floorMesh = Mesh::load("floor.obj");
 
 	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, -1.0f, 0.0f }, floorMesh);
 	floor->setScale(10.0f);
