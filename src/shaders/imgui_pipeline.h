@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 #include <imgui.h>
+#include <SDL.h>
 
 #include "shaders/pipeline.h"
 #include "shaders/shader_program.h"
@@ -23,6 +24,8 @@ public:
 	GLuint getVertexBufferId() const;
 	GLuint getElementBufferId() const;
 	const std::shared_ptr<ShaderProgram>& getImguiProgram() const;
+
+	void handleEvent(const SDL_Event& event) const;
 
 private:
 	static void imguiDrawCallback(ImDrawData* data);

@@ -25,6 +25,16 @@ float Light::getRadius() const
 	return _radius;
 }
 
+void Light::setPosition(const glm::vec3& position)
+{
+	_position = position;
+}
+
+void Light::setIntensity(const glm::vec3& intensity)
+{
+	_intensity = intensity;
+}
+
 void Light::setRadius(float radius)
 {
 	_radius = radius;

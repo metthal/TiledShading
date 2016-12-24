@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shaders/shader_program.h"
@@ -23,7 +21,6 @@ ShaderProgram::ShaderProgram(GLuint id, std::vector<std::shared_ptr<Shader>>&& s
 		glGetActiveAttrib(_id, i, maxAttributeNameLength, &attributeNameLength, &attributeSize, &attributeType, attributeNameBuffer.data());
 
 		auto attributeName = std::string(attributeNameBuffer.begin(), attributeNameBuffer.begin() + attributeNameLength);
-		std::cout << "Attrib: " << attributeName << " " << i << std::endl;
 		_attributes.emplace(attributeName, AttributeInfo{ glGetAttribLocation(_id, attributeName.c_str()) });
 	}
 

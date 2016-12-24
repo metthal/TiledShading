@@ -1,4 +1,7 @@
+#include <sstream>
+
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "shaders/imgui_pipeline.h"
 #include "window/window.h"
@@ -111,6 +114,8 @@ bool ImguiPipeline::init(const Window* window, std::string& error)
 void ImguiPipeline::run(const Window* window, std::uint32_t diff)
 {
 	auto windowSize = window->getDimensions();
+	auto scene = window->getScene();
+	auto lights = scene->getLights();
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(static_cast<float>(window->getDimensions().x), static_cast<float>(window->getDimensions().y));
@@ -119,10 +124,36 @@ void ImguiPipeline::run(const Window* window, std::uint32_t diff)
 
 	ImGui::NewFrame();
 
-	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 150.0f, 0.0f));
-	ImGui::SetNextWindowSizeConstraints(ImVec2(150.0f, 50.0f), ImVec2(150.0f, 100.f));
+	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 300.0f, 0.0f));
+	ImGui::SetNextWindowSize(ImVec2(300.0f, 500.0f));
 	ImGui::Begin("General");
 	ImGui::Text("%u FPS", static_cast<std::uint32_t>(io.Framerate));
+	std::stringstream ss;
+	for (std::size_t i = 0; i < lights.size(); ++i)
+	{
+		ss.clear();
+		ss.str({});
+		ss << "Light #" << i;
+
+		if (ImGui::CollapsingHeader(ss.str().c_str()))
+		{
+			ss.clear();
+			ss.str({});
+			ss << "Intensity##" << i;
+
+			auto intensity = lights[i]->getIntensity();
+			if (ImGui::ColorEdit3(ss.str().c_str(), glm::value_ptr(intensity)))
+				lights[i]->setIntensity(intensity);
+
+			ss.clear();
+			ss.str({});
+			ss << "Radius##" << i;
+
+			auto radius = lights[i]->getRadius();
+			if (ImGui::SliderFloat(ss.str().c_str(), &radius, 1.0f, 30.0f, "%.2f"))
+				lights[i]->setRadius(radius);
+		}
+	}
 	ImGui::End();
 
 	ImGui::Render();
@@ -146,6 +177,28 @@ GLuint ImguiPipeline::getElementBufferId() const
 const std::shared_ptr<ShaderProgram>& ImguiPipeline::getImguiProgram() const
 {
 	return _imguiProgram;
+}
+
+void ImguiPipeline::handleEvent(const SDL_Event& event) const
+{
+	ImGuiIO& io = ImGui::GetIO();
+
+	switch (event.type)
+	{
+		case SDL_MOUSEMOTION:
+			io.MousePos = ImVec2(event.motion.x, event.motion.y);
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			io.MouseDown[0] = event.button.button == SDL_BUTTON_LEFT;
+			io.MouseDown[1] = event.button.button == SDL_BUTTON_RIGHT;
+			break;
+		case SDL_MOUSEBUTTONUP:
+			io.MouseDown[0] = io.MouseDown[0] ? !(event.button.button == SDL_BUTTON_LEFT) : false;
+			io.MouseDown[1] = io.MouseDown[1] ? !(event.button.button == SDL_BUTTON_RIGHT) : false;
+			break;
+		default:
+			break;
+	}
 }
 
 void ImguiPipeline::imguiDrawCallback(ImDrawData* data)

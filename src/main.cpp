@@ -37,17 +37,21 @@ int main(int argc, char** argv)
 	auto bunnyMesh = Mesh::load("bunny.obj");
 	auto floorMesh = Mesh::load("floor.obj");
 
-	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, -1.0f, 0.0f }, floorMesh);
+	auto bunny = std::make_shared<Object>(glm::vec3{ 0.0f, 0.2f, 0.0f }, bunnyMesh);
+	bunny->setScale(0.6f);
+
+	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, floorMesh);
 	floor->setScale(10.0f);
 
-	window.getScene()->getCamera()->setPosition({ -5.0f, 0.0f, 0.0f });
+	window.getScene()->getCamera()->setPosition({ 0.0f, 5.0f, 10.0f });
 	window.getScene()->getCamera()->lookAt({ 0.0f, 0.0f, 0.0f });
 	window.getScene()->getCamera()->setFieldOfView(45.0f);
 	window.getScene()->getCamera()->setAspectRatio(Width, Height);
-	window.getScene()->addObject(std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, bunnyMesh));
+	window.getScene()->addObject(bunny);
 	window.getScene()->addObject(floor);
-	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ 5.0f, 0.01f, 0.0f }, glm::vec3{ 1.0f, 0.0f, 0.0f }, 3.0f));
-	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ -5.0f, 0.01f, 0.0f }, glm::vec3{ 0.0f, 1.0f, 0.0f }, 3.0f));
+	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ 5.0f, 2.0f, 0.0f }, glm::vec3{ 1.0f, 0.0f, 0.0f }, 3.0f));
+	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ -5.0f, 2.0f, 0.0f }, glm::vec3{ 0.0f, 1.0f, 0.0f }, 3.0f));
+	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ 0.0f, 4.0f, 0.0f }, glm::vec3{ 1.0f, 1.0f, 1.0f }, 30.0f));
 
 	window.gameLoop();
 	return 0;
