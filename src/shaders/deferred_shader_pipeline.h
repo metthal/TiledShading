@@ -11,7 +11,7 @@
 class DeferredShaderPipeline : public Pipeline
 {
 public:
-	virtual bool init(std::string& error) override;
+	virtual bool init(const Window* window, std::string& error) override;
 	virtual void run(const Scene* scene) override;
 
 private:

@@ -108,7 +108,7 @@ Scene* Window::getScene()
 
 bool Window::addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string& error)
 {
-	if (!pipeline->init(error))
+	if (!pipeline->init(this, error))
 		return false;
 
 	if (_currentPipeline == nullptr)

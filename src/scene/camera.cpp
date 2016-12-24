@@ -3,6 +3,10 @@
 
 #include "scene/camera.h"
 
+Camera::Camera() : Camera({0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 60.0f, 4.0f / 3.0f)
+{
+}
+
 Camera::Camera(const glm::vec3& position, const glm::vec3& lookAt, float fov, float aspectRatio)
 	: _position(position), _direction(glm::normalize(lookAt - position)), _fov(fov), _aspectRatio(aspectRatio)
 {
@@ -17,6 +21,37 @@ const glm::vec3& Camera::getDirection() const
 {
 	return _direction;
 }
+
+void Camera::lookAt(const glm::vec3& position)
+{
+	_direction = glm::normalize(position - _position);
+}
+
+void Camera::setPosition(const glm::vec3& position)
+{
+	_position = position;
+}
+
+void Camera::setDirection(const glm::vec3& direction)
+{
+	_direction = glm::normalize(direction);
+}
+
+void Camera::setFieldOfView(float fov)
+{
+	_fov = fov;
+}
+
+void Camera::setAspectRatio(std::uint32_t width, std::uint32_t height)
+{
+	setAspectRatio(static_cast<float>(width) / height);
+}
+
+void Camera::setAspectRatio(float aspectRatio)
+{
+	_aspectRatio = aspectRatio;
+}
+
 
 glm::mat4 Camera::getViewTransform() const
 {

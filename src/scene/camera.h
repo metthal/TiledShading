@@ -6,10 +6,18 @@
 class Camera
 {
 public:
-	Camera(const glm::vec3& position, const glm::vec3& lookAt, float fov = 60.0f, float aspectRatio = 4.0f/3.0f);
+	Camera();
+	Camera(const glm::vec3& position, const glm::vec3& lookAt, float fov, float aspectRatio);
 
 	const glm::vec3& getPosition() const;
 	const glm::vec3& getDirection() const;
+
+	void lookAt(const glm::vec3& position);
+	void setPosition(const glm::vec3& position);
+	void setDirection(const glm::vec3& direction);
+	void setFieldOfView(float fov);
+	void setAspectRatio(std::uint32_t width, std::uint32_t height);
+	void setAspectRatio(float aspectRatio);
 
 	glm::mat4 getViewTransform() const;
 

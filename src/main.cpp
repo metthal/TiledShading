@@ -10,6 +10,9 @@
 #include "window/window.h"
 #include "shaders/deferred_shader_pipeline.h"
 
+const std::uint32_t Width = 1366;
+const std::uint32_t Height = 768;
+
 int main(int argc, char** argv)
 {
 	OpenGLConfig config;
@@ -18,7 +21,7 @@ int main(int argc, char** argv)
 	config.debug = true;
 
 	std::string error;
-	Window window("PGP - Tiled Shading", 800, 600);
+	Window window("PGP - Tiled Shading", Width, Height);
 	if (!window.init(config, error))
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", error.c_str(), nullptr);
@@ -37,7 +40,10 @@ int main(int argc, char** argv)
 	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, -1.0f, 0.0f }, floorMesh);
 	floor->setScale(10.0f);
 
-	window.getScene()->setCamera(std::make_shared<Camera>(glm::vec3{ -5.0f, 0.0f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 0.0f }, 60.0f, 800.0f / 600.0f));
+	window.getScene()->getCamera()->setPosition({ -5.0f, 0.0f, 0.0f });
+	window.getScene()->getCamera()->lookAt({ 0.0f, 0.0f, 0.0f });
+	window.getScene()->getCamera()->setFieldOfView(45.0f);
+	window.getScene()->getCamera()->setAspectRatio(Width, Height);
 	window.getScene()->addObject(std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, bunnyMesh));
 	window.getScene()->addObject(floor);
 	window.getScene()->addLight(std::make_shared<Light>(glm::vec3{ 5.0f, 0.01f, 0.0f }, glm::vec3{ 1.0f, 0.0f, 0.0f }, 5.0f));

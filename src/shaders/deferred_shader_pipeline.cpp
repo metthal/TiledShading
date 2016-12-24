@@ -1,7 +1,7 @@
 #include "shaders/deferred_shader_pipeline.h"
 #include "window/window.h"
 
-bool DeferredShaderPipeline::init(std::string& error)
+bool DeferredShaderPipeline::init(const Window* window, std::string& error)
 {
 	_fullScreenQuad = Mesh::load("quad.obj");
 	if (_fullScreenQuad == nullptr)
@@ -35,7 +35,7 @@ bool DeferredShaderPipeline::init(std::string& error)
 		return false;
 
 	_gbuffer = std::make_shared<GBuffer>();
-	if (!_gbuffer->init({800, 600}))
+	if (!_gbuffer->init(window->getDimensions()))
 		return false;
 
 	glEnable(GL_DEPTH_TEST);
