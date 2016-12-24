@@ -43,10 +43,12 @@ void DeferredShaderPipeline::run(const Scene* scene)
 	auto camera = scene->getCamera();
 
 	std::vector<glm::vec3> lightsPos, lightsIntensity;
+	std::vector<float> lightsAttenuation;
 	for (const auto& light : scene->getLights())
 	{
 		lightsPos.push_back(light->getPosition());
 		lightsIntensity.push_back(light->getIntensity());
+		lightsAttenuation.push_back(light->getAttenuation());
 	}
 
 	_gbuffer->activate();
@@ -71,6 +73,7 @@ void DeferredShaderPipeline::run(const Scene* scene)
 	_lightPass->setUniform("lightsCount", static_cast<GLint>(scene->getNumberOfLights()));
 	_lightPass->setUniform("lightsPos", lightsPos);
 	_lightPass->setUniform("lightsIntensity", lightsIntensity);
+	_lightPass->setUniform("lightsAttenuation", lightsAttenuation);
 	for (const auto& object : *scene)
 	{
 		_lightPass->setUniform("model", object->getTransform());

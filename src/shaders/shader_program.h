@@ -41,6 +41,7 @@ public:
 	void setUniform(const std::string& name, GLint value);
 	void setUniform(const std::string& name, const glm::vec3& v);
 	void setUniform(const std::string& name, const glm::mat4& m);
+	void setUniform(const std::string& name, const std::vector<float>& v);
 	void setUniform(const std::string& name, const std::vector<glm::vec3>& v);
 
 private:

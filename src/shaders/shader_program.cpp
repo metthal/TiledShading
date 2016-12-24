@@ -98,6 +98,18 @@ void ShaderProgram::setUniform(const std::string& name, const glm::mat4& m)
 	glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(m));
 }
 
+void ShaderProgram::setUniform(const std::string& name, const std::vector<float>& v)
+{
+	if (v.empty())
+		return;
+
+	auto id = getUniformId(name);
+	if (id == -1)
+		return;
+
+	glUniform1fv(id, static_cast<GLsizei>(v.size()), reinterpret_cast<const GLfloat*>(v.data()));
+}
+
 void ShaderProgram::setUniform(const std::string& name, const std::vector<glm::vec3>& v)
 {
 	if (v.empty())
