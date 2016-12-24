@@ -108,20 +108,21 @@ bool ImguiPipeline::init(const Window* window, std::string& error)
 	return true;
 }
 
-void ImguiPipeline::run(const Window* window)
+void ImguiPipeline::run(const Window* window, std::uint32_t diff)
 {
 	auto windowSize = window->getDimensions();
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(static_cast<float>(window->getDimensions().x), static_cast<float>(window->getDimensions().y));
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+	io.DeltaTime = static_cast<float>(diff) / 1000.0f;
 
 	ImGui::NewFrame();
 
 	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 150.0f, 0.0f));
 	ImGui::SetNextWindowSizeConstraints(ImVec2(150.0f, 50.0f), ImVec2(150.0f, 100.f));
 	ImGui::Begin("General");
-	ImGui::Text("Hello, world!");
+	ImGui::Text("%u FPS", static_cast<std::uint32_t>(io.Framerate));
 	ImGui::End();
 
 	ImGui::Render();

@@ -73,6 +73,7 @@ bool Window::init(const OpenGLConfig& config, std::string& error)
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
 	}
 
+	SDL_GL_SetSwapInterval(0);
 	glClearColor(config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f);
 
 	if (!_imguiPipeline.init(this, error))
@@ -85,8 +86,14 @@ void Window::gameLoop()
 {
 	SDL_Event event;
 	bool running = true;
+
+	std::uint32_t lastDiff = SDL_GetTicks();
 	while (running)
 	{
+		std::uint32_t now = SDL_GetTicks();
+		std::uint32_t diff = now - lastDiff;
+		lastDiff = now;
+
 		while (SDL_PollEvent(&event) > 0)
 		{
 			if (event.type == SDL_QUIT)
@@ -98,8 +105,8 @@ void Window::gameLoop()
 			handleEvent(event);
 		}
 
-		_currentPipeline->run(this);
-		_imguiPipeline.run(this);
+		_currentPipeline->run(this, diff);
+		_imguiPipeline.run(this, diff);
 
 		SDL_GL_SwapWindow(_impl);
 	}

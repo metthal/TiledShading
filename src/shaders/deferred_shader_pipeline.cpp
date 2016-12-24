@@ -44,7 +44,7 @@ bool DeferredShaderPipeline::init(const Window* window, std::string& error)
 	return true;
 }
 
-void DeferredShaderPipeline::run(const Window* window)
+void DeferredShaderPipeline::run(const Window* window, std::uint32_t diff)
 {
 	auto scene = window->getScene();
 	auto camera = scene->getCamera();
