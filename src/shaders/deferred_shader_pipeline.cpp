@@ -3,11 +3,11 @@
 
 bool DeferredShaderPipeline::init(std::string& error)
 {
-	auto geometryVs = Shader::load("shaders/deferred_shader.vert", error);
+	auto geometryVs = Shader::load("shaders/deferred_shader_geo_pass.vert", error);
 	if (!geometryVs)
 		return false;
 
-	auto geometryFs = Shader::load("shaders/deferred_shader.frag", error);
+	auto geometryFs = Shader::load("shaders/deferred_shader_geo_pass.frag", error);
 	if (!geometryFs)
 		return false;
 
