@@ -35,7 +35,7 @@ void main()
         vec3 halfway = normalize(cameraDir + normal);
 
         vec3 diffuseColor = max(0.0, dot(normal, lightDir)) * albedo * lightsIntensity[i];
-        vec3 specularColor = pow(max(0.0, dot(halfway, lightDir)), 16) * specular * lightsIntensity[i];
+        vec3 specularColor = pow(max(0.0, dot(halfway, lightDir)), 64) * specular * lightsIntensity[i];
 
         float att = attenuation(lightsPos[i], pos, lightsAttenuation[i]);
         outColor += att * (diffuseColor + specularColor);
