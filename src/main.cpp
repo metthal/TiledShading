@@ -56,6 +56,7 @@ int main(int argc, char** argv)
 	std::uniform_real_distribution<float>::param_type position(-10.0f, 10.0f);
 	std::uniform_real_distribution<float>::param_type color(0.0f, 1.0f);
 	std::uniform_real_distribution<float>::param_type velocity(3.0f, 5.0f);
+	std::discrete_distribution<int> velocityDirection({ 1, 0, 1 });
 	for (int i = 0; i < 64; ++i)
 	{
 		float x = uniform(rng, position);
@@ -63,8 +64,8 @@ int main(int argc, char** argv)
 		float r = uniform(rng, color);
 		float g = uniform(rng, color);
 		float b = uniform(rng, color);
-		float vx = uniform(rng, velocity);
-		float vz = uniform(rng, velocity);
+		float vx = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
+		float vz = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
 
 		auto light = std::make_shared<Light>(glm::vec3{ x, 0.5f, z }, glm::vec3{ r, g, b }, 3.0f);
 		light->setVelocity({ vx, 0.0f, vz });
