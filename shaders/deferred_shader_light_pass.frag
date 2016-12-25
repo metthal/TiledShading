@@ -4,9 +4,9 @@ uniform sampler2D gbufferPos;
 uniform sampler2D gbufferNormal;
 uniform sampler2D gbufferAlbedo;
 uniform int lightsCount;
-uniform vec3 lightsPos[32];
-uniform vec3 lightsIntensity[32];
-uniform float lightsAttenuation[32];
+uniform vec3 lightsPos[64];
+uniform vec3 lightsIntensity[64];
+uniform float lightsAttenuation[64];
 
 out vec3 outColor;
 

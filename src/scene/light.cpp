@@ -25,6 +25,11 @@ float Light::getRadius() const
 	return _radius;
 }
 
+const glm::vec3& Light::getVelocity() const
+{
+	return _velocity;
+}
+
 void Light::setPosition(const glm::vec3& position)
 {
 	_position = position;
@@ -39,4 +44,15 @@ void Light::setRadius(float radius)
 {
 	_radius = radius;
 	_attenuation = 1.0f / (_radius * _radius) * 10.0f;
+}
+
+void Light::setVelocity(const glm::vec3& velocity)
+{
+	_velocity = velocity;
+}
+
+void Light::update(std::uint32_t diff)
+{
+	float dt = static_cast<float>(diff) / 1000.0f;
+	_position += dt * _velocity;
 }

@@ -106,6 +106,8 @@ void Window::gameLoop()
 			_imguiPipeline.handleEvent(event);
 		}
 
+		_scene.update(diff);
+
 		_currentPipeline->run(this, diff);
 		_imguiPipeline.run(this, diff);
 

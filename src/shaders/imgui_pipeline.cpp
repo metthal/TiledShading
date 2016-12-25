@@ -111,7 +111,7 @@ bool ImguiPipeline::init(const Window* window, std::string& error)
 	return true;
 }
 
-void ImguiPipeline::run(const Window* window, std::uint32_t diff)
+void ImguiPipeline::run(Window* window, std::uint32_t diff)
 {
 	auto windowSize = window->getDimensions();
 	auto scene = window->getScene();
@@ -124,10 +124,20 @@ void ImguiPipeline::run(const Window* window, std::uint32_t diff)
 
 	ImGui::NewFrame();
 
-	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 300.0f, 0.0f));
-	ImGui::SetNextWindowSize(ImVec2(300.0f, 500.0f));
+	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+	ImGui::SetNextWindowSize(ImVec2(150.0f, 300.0f));
 	ImGui::Begin("General");
 	ImGui::Text("%u FPS", static_cast<std::uint32_t>(io.Framerate));
+	auto moveLights = scene->areLightsMoving();
+	if (ImGui::Checkbox("Moving lights", &moveLights))
+	{
+		scene->setMoveLights(moveLights);
+	}
+	ImGui::End();
+
+	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 300.0f, 0.0f));
+	ImGui::SetNextWindowSize(ImVec2(300.0f, 500.0f));
+	ImGui::Begin("Lights");
 	std::stringstream ss;
 	for (std::size_t i = 0; i < lights.size(); ++i)
 	{
@@ -152,6 +162,17 @@ void ImguiPipeline::run(const Window* window, std::uint32_t diff)
 			auto radius = lights[i]->getRadius();
 			if (ImGui::SliderFloat(ss.str().c_str(), &radius, 1.0f, 30.0f, "%.2f"))
 				lights[i]->setRadius(radius);
+
+			ss.clear();
+			ss.str({});
+			ss << "Velocity##" << i;
+
+			auto velocity = lights[i]->getVelocity();
+			if (ImGui::SliderFloat3(ss.str().c_str(), glm::value_ptr(velocity), 0.0f, 6.0f, "%.2f"))
+			{
+				velocity.y = 0.0f;
+				lights[i]->setVelocity(velocity);
+			}
 		}
 	}
 	ImGui::End();
@@ -186,7 +207,7 @@ void ImguiPipeline::handleEvent(const SDL_Event& event) const
 	switch (event.type)
 	{
 		case SDL_MOUSEMOTION:
-			io.MousePos = ImVec2(event.motion.x, event.motion.y);
+			io.MousePos = ImVec2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y));
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			io.MouseDown[0] = event.button.button == SDL_BUTTON_LEFT;
@@ -239,7 +260,10 @@ void ImguiPipeline::imguiDrawCallback(ImDrawData* data)
 			else
 			{
 				glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(reinterpret_cast<intptr_t>(cmd->TextureId)));
-				glScissor(cmd->ClipRect.x, io.DisplaySize.y - cmd->ClipRect.w, cmd->ClipRect.z - cmd->ClipRect.x, cmd->ClipRect.w - cmd->ClipRect.y);
+				glScissor(static_cast<GLint>(cmd->ClipRect.x),
+					static_cast<GLint>(io.DisplaySize.y - cmd->ClipRect.w),
+					static_cast<GLsizei>(cmd->ClipRect.z - cmd->ClipRect.x),
+					static_cast<GLsizei>(cmd->ClipRect.w - cmd->ClipRect.y));
 				glDrawElements(GL_TRIANGLES, cmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, drawIdxBufferOffset);
 			}
 			drawIdxBufferOffset += cmd->ElemCount;

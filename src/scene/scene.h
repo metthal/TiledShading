@@ -15,6 +15,9 @@ public:
 	Camera* getCamera();
 	const Camera* getCamera() const;
 	const std::vector<std::shared_ptr<Light>>& getLights() const;
+	bool areLightsMoving() const;
+
+	void setMoveLights(bool set);
 
 	void addLight(const std::shared_ptr<Light>& light);
 	void addLight(std::shared_ptr<Light>&& light);
@@ -27,10 +30,13 @@ public:
 	auto begin() const { return _objects.begin(); }
 	auto end() const { return _objects.end(); }
 
+	void update(std::uint32_t diff);
+
 private:
 	Camera _camera;
 	std::vector<std::shared_ptr<Light>> _lights;
 	std::vector<std::shared_ptr<Object>> _objects;
+	bool _moveLights = true;
 };
 
 #endif
