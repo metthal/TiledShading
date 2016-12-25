@@ -38,8 +38,15 @@ int main(int argc, char** argv)
 	auto bunnyMesh = Mesh::load("bunny.obj");
 	auto floorMesh = Mesh::load("floor.obj");
 
-	auto bunny = std::make_shared<Object>(glm::vec3{ 0.0f, 0.2f, 0.0f }, bunnyMesh);
+	auto bunny = std::make_shared<Object>(glm::vec3{ 5.0f, 0.2f, 5.0f }, bunnyMesh);
 	bunny->setScale(0.6f);
+	auto bunny2 = std::make_shared<Object>(*bunny.get());
+	auto bunny3 = std::make_shared<Object>(*bunny.get());
+	auto bunny4 = std::make_shared<Object>(*bunny.get());
+
+	bunny2->setPosition({ 5.0f, 0.2f, -5.0f });
+	bunny3->setPosition({ -5.0f, 0.2f, 5.0f });
+	bunny4->setPosition({ -5.0f, 0.2f, -5.0f });
 
 	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, floorMesh);
 	floor->setScale(10.0f);
@@ -49,28 +56,12 @@ int main(int argc, char** argv)
 	window.getScene()->getCamera()->setFieldOfView(45.0f);
 	window.getScene()->getCamera()->setAspectRatio(Width, Height);
 	window.getScene()->addObject(bunny);
+	window.getScene()->addObject(bunny2);
+	window.getScene()->addObject(bunny3);
+	window.getScene()->addObject(bunny4);
 	window.getScene()->addObject(floor);
 
-	std::mt19937 rng(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
-	std::uniform_real_distribution<float> uniform;
-	std::uniform_real_distribution<float>::param_type position(-10.0f, 10.0f);
-	std::uniform_real_distribution<float>::param_type color(0.0f, 1.0f);
-	std::uniform_real_distribution<float>::param_type velocity(3.0f, 5.0f);
-	std::discrete_distribution<int> velocityDirection({ 1, 0, 1 });
-	for (int i = 0; i < 64; ++i)
-	{
-		float x = uniform(rng, position);
-		float z = uniform(rng, position);
-		float r = uniform(rng, color);
-		float g = uniform(rng, color);
-		float b = uniform(rng, color);
-		float vx = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
-		float vz = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
-
-		auto light = std::make_shared<Light>(glm::vec3{ x, 0.5f, z }, glm::vec3{ r, g, b }, 3.0f);
-		light->setVelocity({ vx, 0.0f, vz });
-		window.getScene()->addLight(light);
-	}
+	window.getScene()->generateLights(64);
 
 	window.gameLoop();
 	return 0;

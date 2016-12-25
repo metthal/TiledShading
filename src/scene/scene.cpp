@@ -1,3 +1,7 @@
+#include <algorithm>
+#include <chrono>
+#include <random>
+
 #include "scene/scene.h"
 
 std::size_t Scene::getNumberOfLights() const
@@ -67,5 +71,37 @@ void Scene::update(std::uint32_t diff)
 
 			light->setVelocity(velocity);
 		}
+	}
+}
+
+void Scene::removeLights(std::size_t count)
+{
+	count = std::min(getNumberOfLights(), count);
+	_lights.resize(getNumberOfLights() - count);
+}
+
+void Scene::generateLights(std::size_t count)
+{
+	static std::mt19937 rng(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+	static std::uniform_real_distribution<float> uniform;
+	static std::uniform_real_distribution<float>::param_type position(-10.0f, 10.0f);
+	static std::uniform_real_distribution<float>::param_type color(0.0f, 1.0f);
+	static std::uniform_real_distribution<float>::param_type velocity(3.0f, 5.0f);
+	static std::discrete_distribution<int> velocityDirection({ 1, 0, 1 });
+
+	count = std::min(count, static_cast<std::size_t>(64));
+	for (int i = 0; i < 64; ++i)
+	{
+		float x = uniform(rng, position);
+		float z = uniform(rng, position);
+		float r = uniform(rng, color);
+		float g = uniform(rng, color);
+		float b = uniform(rng, color);
+		float vx = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
+		float vz = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
+
+		auto light = std::make_shared<Light>(glm::vec3{ x, 0.5f, z }, glm::vec3{ r, g, b }, 3.0f);
+		light->setVelocity({ vx, 0.0f, vz });
+		addLight(light);
 	}
 }

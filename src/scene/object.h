@@ -17,6 +17,7 @@ public:
 	float getScale() const;
 	const glm::vec3& getColor() const;
 
+	void setPosition(const glm::vec3& position);
 	void setScale(float scale);
 	void setColor(const glm::vec3& color);
 

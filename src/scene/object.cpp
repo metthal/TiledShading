@@ -26,9 +26,19 @@ const glm::vec3& Object::getColor() const
 	return _color;
 }
 
+void Object::setPosition(const glm::vec3& position)
+{
+	_position = position;
+}
+
 void Object::setScale(float scale)
 {
 	_scale = scale;
+}
+
+void Object::setColor(const glm::vec3& color)
+{
+	_color = color;
 }
 
 glm::mat4 Object::getTransform() const

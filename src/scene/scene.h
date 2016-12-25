@@ -32,6 +32,9 @@ public:
 
 	void update(std::uint32_t diff);
 
+	void removeLights(std::size_t count);
+	void generateLights(std::size_t count);
+
 private:
 	Camera _camera;
 	std::vector<std::shared_ptr<Light>> _lights;

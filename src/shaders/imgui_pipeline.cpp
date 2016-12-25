@@ -133,6 +133,14 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	{
 		scene->setMoveLights(moveLights);
 	}
+	auto numLights = static_cast<int>(scene->getNumberOfLights());
+	if (ImGui::SliderInt("Lights count", &numLights, 1, 64))
+	{
+		if (numLights < scene->getNumberOfLights())
+			scene->removeLights(scene->getNumberOfLights() - numLights);
+		else
+			scene->generateLights(numLights - scene->getNumberOfLights());
+	}
 	ImGui::End();
 
 	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 300.0f, 0.0f));
