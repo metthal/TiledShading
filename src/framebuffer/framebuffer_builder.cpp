@@ -31,7 +31,7 @@ FramebufferBuilder& FramebufferBuilder::withTexture(GLuint attachment, const glm
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, dimensions.x, dimensions.y, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	_framebuffer->addTextureAttachment(attachment, textureId);
+	_framebuffer->addAttachment(attachment, textureId);
 
 	_attachments.push_back(attachment);
 	return *this;
@@ -42,11 +42,14 @@ FramebufferBuilder& FramebufferBuilder::withDepthBuffer(const glm::ivec2& dimens
 	if (_framebuffer == nullptr)
 		init();
 
-	GLuint renderbuffer;
-	glGenRenderbuffers(1, &renderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, dimensions.x, dimensions.y);
-	_framebuffer->addRenderbufferAttachment(GL_DEPTH_ATTACHMENT, renderbuffer);
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, dimensions.x, dimensions.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	_framebuffer->addAttachment(GL_DEPTH_ATTACHMENT, textureId);
 	return *this;
 }
 

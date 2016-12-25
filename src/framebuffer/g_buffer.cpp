@@ -44,22 +44,22 @@ void GBuffer::activateTextures()
 
 GLuint GBuffer::getPositionId() const
 {
-	return std::get<1>(_framebuffer->getAttachmentTypeId(GL_COLOR_ATTACHMENT0));
+	return _framebuffer->getAttachmentId(GL_COLOR_ATTACHMENT0);
 }
 
 GLuint GBuffer::getNormalId() const
 {
-	return std::get<1>(_framebuffer->getAttachmentTypeId(GL_COLOR_ATTACHMENT1));
+	return _framebuffer->getAttachmentId(GL_COLOR_ATTACHMENT1);
 }
 
 GLuint GBuffer::getAlbedoId() const
 {
-	return std::get<1>(_framebuffer->getAttachmentTypeId(GL_COLOR_ATTACHMENT2));
+	return _framebuffer->getAttachmentId(GL_COLOR_ATTACHMENT2);
 }
 
 GLuint GBuffer::getSpecularId() const
 {
-	return std::get<1>(_framebuffer->getAttachmentTypeId(GL_COLOR_ATTACHMENT3));
+	return _framebuffer->getAttachmentId(GL_COLOR_ATTACHMENT3);
 }
 
 GLuint GBuffer::getPositionTextureUnit() const

@@ -16,24 +16,20 @@ enum FramebufferAccess
 class Framebuffer
 {
 public:
-	using TypeId = std::tuple<GLuint, GLuint>;
-
 	Framebuffer();
 	~Framebuffer();
 
 	GLuint getId() const;
-	TypeId getAttachmentTypeId(GLuint attachment) const;
+	GLuint getAttachmentId(GLuint attachment) const;
 
 	void activate(FramebufferAccess access = FramebufferDrawRead);
 	void deactivate(FramebufferAccess access = FramebufferDrawRead);
 
-	bool addTextureAttachment(GLuint attachment, GLuint attachmentId);
-	bool addRenderbufferAttachment(GLuint attachment, GLuint attachmentId);
-
+	bool addAttachment(GLuint attachment, GLuint attachmentId);
 
 private:
 	GLuint _id;
-	std::unordered_map<GLuint, TypeId> _attachmentTable;
+	std::unordered_map<GLuint, GLuint> _attachmentTable;
 };
 
 #endif
