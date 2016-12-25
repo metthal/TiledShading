@@ -21,20 +21,22 @@ public:
 
 	glm::mat4 getViewTransform() const;
 
-	void moveForwards(float step);
-	void moveBackwards(float step);
-	void strafeLeft(float step);
-	void strafeRight(float right);
-	void turnLeft(float angle);
-	void turnRight(float angle);
-	void turnUp(float angle);
-	void turnDown(float angle);
+	void moveForwards(std::uint32_t diff);
+	void moveBackwards(std::uint32_t diff);
+	void strafeLeft(std::uint32_t diff);
+	void strafeRight(std::uint32_t diff);
+	void turnLeft(std::uint32_t diff, float angle);
+	void turnRight(std::uint32_t diff, float angle);
+	void turnUp(std::uint32_t diff, float angle);
+	void turnDown(std::uint32_t diff, float angle);
 
 private:
 	glm::vec3 _position;
 	glm::vec3 _direction;
 	float _fov;
 	float _aspectRatio;
+	float _moveSpeed;
+	float _turnSpeed;
 };
 
 #endif

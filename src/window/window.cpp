@@ -102,7 +102,7 @@ void Window::gameLoop()
 				break;
 			}
 
-			handleEvent(event);
+			handleEvent(event, diff);
 			_imguiPipeline.handleEvent(event);
 		}
 
@@ -154,47 +154,47 @@ void Window::switchPipeline(std::size_t index)
 	_currentPipeline = _pipelines[index].get();
 }
 
-void Window::handleEvent(const SDL_Event& event)
+void Window::handleEvent(const SDL_Event& event, std::uint32_t diff)
 {
 	switch (event.type)
 	{
 		case SDL_KEYDOWN:
-			handleKeydown(event);
+			handleKeydown(event, diff);
 			break;
 		case SDL_MOUSEMOTION:
-			handleMouseMove(event);
+			handleMouseMove(event, diff);
 			break;
 		default:
 			return;
 	}
 }
 
-void Window::handleKeydown(const SDL_Event& event)
+void Window::handleKeydown(const SDL_Event& event, std::uint32_t diff)
 {
 	switch (event.key.keysym.sym)
 	{
 		case SDLK_w:
-			_scene.getCamera()->moveForwards(0.1f);
+			_scene.getCamera()->moveForwards(diff);
 			break;
 		case SDLK_s:
-			_scene.getCamera()->moveBackwards(0.1f);
+			_scene.getCamera()->moveBackwards(diff);
 			break;
 		case SDLK_a:
-			_scene.getCamera()->strafeLeft(0.1f);
+			_scene.getCamera()->strafeLeft(diff);
 			break;
 		case SDLK_d:
-			_scene.getCamera()->strafeRight(0.1f);
+			_scene.getCamera()->strafeRight(diff);
 			break;
 		default:
 			return;
 	}
 }
 
-void Window::handleMouseMove(const SDL_Event& event)
+void Window::handleMouseMove(const SDL_Event& event, std::uint32_t diff)
 {
 	if (event.motion.state & SDL_BUTTON_RMASK)
 	{
-		_scene.getCamera()->turnUp(event.motion.yrel * static_cast<float>(M_PI) / 180.0f);
-		_scene.getCamera()->turnRight(event.motion.xrel * static_cast<float>(M_PI) / 180.0f);
+		_scene.getCamera()->turnUp(diff, event.motion.yrel * static_cast<float>(M_PI) / 180.0f);
+		_scene.getCamera()->turnRight(diff, event.motion.xrel * static_cast<float>(M_PI) / 180.0f);
 	}
 }

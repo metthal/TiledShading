@@ -125,7 +125,7 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	ImGui::NewFrame();
 
 	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-	ImGui::SetNextWindowSize(ImVec2(150.0f, 300.0f));
+	ImGui::SetNextWindowSize(ImVec2(200.0f, 300.0f));
 	ImGui::Begin("General");
 	ImGui::Text("%u FPS", static_cast<std::uint32_t>(io.Framerate));
 	auto moveLights = scene->areLightsMoving();
@@ -134,7 +134,7 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 		scene->setMoveLights(moveLights);
 	}
 	auto numLights = static_cast<int>(scene->getNumberOfLights());
-	if (ImGui::SliderInt("Lights count", &numLights, 1, 64))
+	if (ImGui::SliderInt("Lights", &numLights, 1, 64))
 	{
 		if (numLights < scene->getNumberOfLights())
 			scene->removeLights(scene->getNumberOfLights() - numLights);

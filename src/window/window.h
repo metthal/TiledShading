@@ -41,9 +41,9 @@ public:
 	void switchPipeline(std::size_t index);
 
 private:
-	void handleEvent(const SDL_Event& event);
-	void handleKeydown(const SDL_Event& event);
-	void handleMouseMove(const SDL_Event& event);
+	void handleEvent(const SDL_Event& event, std::uint32_t diff);
+	void handleKeydown(const SDL_Event& event, std::uint32_t diff);
+	void handleMouseMove(const SDL_Event& event, std::uint32_t diff);
 
 	std::string _title;
 	glm::ivec2 _dimensions;
