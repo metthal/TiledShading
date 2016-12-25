@@ -46,6 +46,9 @@ bool DeferredShaderPipeline::init(const Window* window, std::string& error)
 
 void DeferredShaderPipeline::run(Window* window, std::uint32_t diff)
 {
+	auto windowSize = window->getDimensions();
+	auto windowWidthHalf = windowSize.x / 2;
+	auto windowHeightHalf = windowSize.y / 2;
 	auto scene = window->getScene();
 	auto camera = scene->getCamera();
 
@@ -75,12 +78,36 @@ void DeferredShaderPipeline::run(Window* window, std::uint32_t diff)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	_lightPass->activate();
 	_gbuffer->activateTextures();
+	_lightPass->setUniform("cameraPos", scene->getCamera()->getPosition());
 	_lightPass->setUniform("gbufferPos", _gbuffer->getPositionTextureUnit());
 	_lightPass->setUniform("gbufferNormal", _gbuffer->getNormalTextureUnit());
 	_lightPass->setUniform("gbufferAlbedo", _gbuffer->getAlbedoTextureUnit());
+	_lightPass->setUniform("gbufferSpecular", _gbuffer->getSpecularTextureUnit());
 	_lightPass->setUniform("lightsCount", static_cast<GLint>(scene->getNumberOfLights()));
 	_lightPass->setUniform("lightsPos", lightsPos);
 	_lightPass->setUniform("lightsIntensity", lightsIntensity);
 	_lightPass->setUniform("lightsAttenuation", lightsAttenuation);
 	_fullScreenQuad->render();
+
+	//_gbuffer->deactivate();
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//_gbuffer->activate(FramebufferRead);
+	//glReadBuffer(GL_COLOR_ATTACHMENT0);
+	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
+	//	0, windowHeightHalf, windowWidthHalf, windowSize.y,
+	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//glReadBuffer(GL_COLOR_ATTACHMENT1);
+	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
+	//	windowWidthHalf, windowHeightHalf, windowSize.x, windowSize.y,
+	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//glReadBuffer(GL_COLOR_ATTACHMENT2);
+	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
+	//	0, 0, windowWidthHalf, windowHeightHalf,
+	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//_gbuffer->deactivate(FramebufferRead);
+	//glReadBuffer(GL_COLOR_ATTACHMENT3);
+	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
+	//	windowWidthHalf, 0, windowSize.x, windowHeightHalf,
+	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//_gbuffer->deactivate(FramebufferRead);
 }

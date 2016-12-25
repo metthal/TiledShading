@@ -10,20 +10,21 @@ bool GBuffer::init(const glm::ivec2& dimensions)
 		.withTexture(GL_COLOR_ATTACHMENT0, dimensions)
 		.withTexture(GL_COLOR_ATTACHMENT1, dimensions)
 		.withTexture(GL_COLOR_ATTACHMENT2, dimensions)
+		.withTexture(GL_COLOR_ATTACHMENT3, dimensions)
 		.withDepthBuffer(dimensions)
 		.create();
 
 	return _framebuffer != nullptr;
 }
 
-void GBuffer::activate()
+void GBuffer::activate(FramebufferAccess access)
 {
-	_framebuffer->activate();
+	_framebuffer->activate(access);
 }
 
-void GBuffer::deactivate()
+void GBuffer::deactivate(FramebufferAccess access)
 {
-	_framebuffer->deactivate();
+	_framebuffer->deactivate(access);
 }
 
 void GBuffer::activateTextures()
@@ -36,6 +37,9 @@ void GBuffer::activateTextures()
 
 	glActiveTexture(GL_TEXTURE0 + getAlbedoTextureUnit());
 	glBindTexture(GL_TEXTURE_2D, getAlbedoId());
+
+	glActiveTexture(GL_TEXTURE0 + getSpecularTextureUnit());
+	glBindTexture(GL_TEXTURE_2D, getSpecularId());
 }
 
 GLuint GBuffer::getPositionId() const
@@ -53,6 +57,11 @@ GLuint GBuffer::getAlbedoId() const
 	return std::get<1>(_framebuffer->getAttachmentTypeId(GL_COLOR_ATTACHMENT2));
 }
 
+GLuint GBuffer::getSpecularId() const
+{
+	return std::get<1>(_framebuffer->getAttachmentTypeId(GL_COLOR_ATTACHMENT3));
+}
+
 GLuint GBuffer::getPositionTextureUnit() const
 {
 	return 0;
@@ -66,4 +75,9 @@ GLuint GBuffer::getNormalTextureUnit() const
 GLuint GBuffer::getAlbedoTextureUnit() const
 {
 	return 2;
+}
+
+GLuint GBuffer::getSpecularTextureUnit() const
+{
+	return 3;
 }
