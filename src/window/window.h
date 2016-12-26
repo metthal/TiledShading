@@ -37,6 +37,7 @@ public:
 	Scene* getScene();
 	const Scene* getScene() const;
 
+	std::size_t getActivePipelineIndex() const;
 	bool addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string& error);
 	void switchPipeline(std::size_t index);
 
@@ -47,12 +48,13 @@ private:
 
 	std::string _title;
 	glm::ivec2 _dimensions;
-	Scene _scene;
+	std::unique_ptr<Scene> _scene;
 	std::vector<std::shared_ptr<Pipeline>> _pipelines;
 	ImguiPipeline _imguiPipeline;
 
 	SDL_Window* _impl;
 	SDL_GLContext _glContext;
+	std::size_t _currentPipelineIndex;
 	Pipeline* _currentPipeline;
 };
 

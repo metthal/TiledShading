@@ -25,6 +25,7 @@ public:
 	GLuint getNormalTextureUnit() const;
 	GLuint getAlbedoTextureUnit() const;
 	GLuint getSpecularTextureUnit() const;
+	GLuint getDepthTextureUnit() const;
 
 private:
 	std::shared_ptr<Framebuffer> _framebuffer;

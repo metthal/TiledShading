@@ -16,7 +16,7 @@ void __stdcall openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 }
 
 Window::Window(const std::string& title, const glm::ivec2& dimensions)
-	: _title(title), _dimensions(dimensions), _scene(), _pipelines(), _imguiPipeline(), _impl(nullptr), _glContext(nullptr), _currentPipeline(nullptr)
+	: _title(title), _dimensions(dimensions), _scene(nullptr), _pipelines(), _imguiPipeline(), _impl(nullptr), _glContext(nullptr), _currentPipeline(nullptr)
 {
 }
 
@@ -79,6 +79,7 @@ bool Window::init(const OpenGLConfig& config, std::string& error)
 	if (!_imguiPipeline.init(this, error))
 		return false;
 
+	_scene = std::make_unique<Scene>();
 	return true;
 }
 
@@ -106,7 +107,7 @@ void Window::gameLoop()
 			_imguiPipeline.handleEvent(event);
 		}
 
-		_scene.update(diff);
+		_scene->update(diff);
 
 		_currentPipeline->run(this, diff);
 		_imguiPipeline.run(this, diff);
@@ -127,12 +128,17 @@ const glm::ivec2& Window::getDimensions() const
 
 Scene* Window::getScene()
 {
-	return &_scene;
+	return _scene.get();
 }
 
 const Scene* Window::getScene() const
 {
-	return &_scene;
+	return _scene.get();
+}
+
+std::size_t Window::getActivePipelineIndex() const
+{
+	return _currentPipelineIndex;
 }
 
 bool Window::addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string& error)
@@ -141,7 +147,10 @@ bool Window::addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string&
 		return false;
 
 	if (_currentPipeline == nullptr)
+	{
+		_currentPipelineIndex = 0;
 		_currentPipeline = pipeline.get();
+	}
 	_pipelines.push_back(pipeline);
 	return true;
 }
@@ -151,6 +160,7 @@ void Window::switchPipeline(std::size_t index)
 	if (index >= _pipelines.size())
 		return;
 
+	_currentPipelineIndex = index;
 	_currentPipeline = _pipelines[index].get();
 }
 
@@ -174,16 +184,16 @@ void Window::handleKeydown(const SDL_Event& event, std::uint32_t diff)
 	switch (event.key.keysym.sym)
 	{
 		case SDLK_w:
-			_scene.getCamera()->moveForwards(diff);
+			_scene->getCamera()->moveForwards(diff);
 			break;
 		case SDLK_s:
-			_scene.getCamera()->moveBackwards(diff);
+			_scene->getCamera()->moveBackwards(diff);
 			break;
 		case SDLK_a:
-			_scene.getCamera()->strafeLeft(diff);
+			_scene->getCamera()->strafeLeft(diff);
 			break;
 		case SDLK_d:
-			_scene.getCamera()->strafeRight(diff);
+			_scene->getCamera()->strafeRight(diff);
 			break;
 		default:
 			return;
@@ -194,7 +204,7 @@ void Window::handleMouseMove(const SDL_Event& event, std::uint32_t diff)
 {
 	if (event.motion.state & SDL_BUTTON_RMASK)
 	{
-		_scene.getCamera()->turnUp(diff, event.motion.yrel * static_cast<float>(M_PI) / 180.0f);
-		_scene.getCamera()->turnRight(diff, event.motion.xrel * static_cast<float>(M_PI) / 180.0f);
+		_scene->getCamera()->turnUp(diff, event.motion.yrel * static_cast<float>(M_PI) / 180.0f);
+		_scene->getCamera()->turnRight(diff, event.motion.xrel * static_cast<float>(M_PI) / 180.0f);
 	}
 }

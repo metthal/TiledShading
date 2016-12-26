@@ -8,14 +8,31 @@
 #include "scene/light.h"
 #include "scene/object.h"
 
+const std::size_t MaxLights = 1024;
+
+struct LightData
+{
+	float attenuation;
+	float radius;
+	float padding1[2];
+	glm::vec3 position;
+	float padding2[1];
+	glm::vec3 intensity;
+	float padding3[1];
+};
+
 class Scene
 {
 public:
+	Scene();
+	~Scene();
+
 	std::size_t getNumberOfLights() const;
 	Camera* getCamera();
 	const Camera* getCamera() const;
 	const std::vector<std::shared_ptr<Light>>& getLights() const;
 	bool areLightsMoving() const;
+	GLuint getLightsBufferId() const;
 
 	void setMoveLights(bool set);
 
@@ -43,6 +60,7 @@ private:
 	std::vector<std::shared_ptr<Light>> _lights;
 	std::vector<std::shared_ptr<Object>> _objects;
 	bool _moveLights = true;
+	GLuint _lightsUbo = 0;
 
 	bool _newMoveLights = true;
 	std::size_t _newLightsCount = 0;

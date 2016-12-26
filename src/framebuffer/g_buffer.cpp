@@ -40,6 +40,9 @@ void GBuffer::activateTextures()
 
 	glActiveTexture(GL_TEXTURE0 + getSpecularTextureUnit());
 	glBindTexture(GL_TEXTURE_2D, getSpecularId());
+
+	glActiveTexture(GL_TEXTURE0 + getDepthTextureUnit());
+	glBindTexture(GL_TEXTURE_2D, getDepthId());
 }
 
 GLuint GBuffer::getPositionId() const
@@ -85,4 +88,9 @@ GLuint GBuffer::getAlbedoTextureUnit() const
 GLuint GBuffer::getSpecularTextureUnit() const
 {
 	return 3;
+}
+
+GLuint GBuffer::getDepthTextureUnit() const
+{
+	return 4;
 }

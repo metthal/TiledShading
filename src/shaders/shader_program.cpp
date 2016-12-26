@@ -2,15 +2,18 @@
 
 #include "shaders/shader_program.h"
 #include "utils/utils.h"
+#include <iostream>
 
 ShaderProgram::ShaderProgram(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaders) : _id(id), _numAttributes(0), _numUniforms(0), _shaders(std::move(shaders))
 {
 	glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &_numAttributes);
 	glGetProgramiv(_id, GL_ACTIVE_UNIFORMS, &_numUniforms);
+	glGetProgramiv(_id, GL_ACTIVE_UNIFORM_BLOCKS, &_numUniformBlocks);
 
-	GLint maxAttributeNameLength, maxUniformNameLength;
+	GLint maxAttributeNameLength, maxUniformNameLength, maxUniformBlockNameLength;
 	glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
 	glGetProgramiv(_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
+	glGetProgramiv(_id, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxUniformBlockNameLength);
 
 	for (int i = 0; i < _numAttributes; ++i)
 	{
@@ -42,6 +45,16 @@ ShaderProgram::ShaderProgram(GLuint id, std::vector<std::shared_ptr<Shader>>&& s
 		}
 
 		_uniforms.emplace(uniformName, UniformInfo{ glGetUniformLocation(_id, uniformName.c_str()), array });
+	}
+
+	for (int i = 0; i < _numUniformBlocks; ++i)
+	{
+		GLsizei uniformBlockNameLength;
+		std::vector<char> uniformBlockNameBuffer(maxUniformBlockNameLength);
+		glGetActiveUniformBlockName(_id, i, maxUniformBlockNameLength, &uniformBlockNameLength, uniformBlockNameBuffer.data());
+
+		auto uniformBlockName = std::string(uniformBlockNameBuffer.begin(), uniformBlockNameBuffer.begin() + uniformBlockNameLength);
+		_uniformBlocks.emplace(uniformBlockName, UniformBlockInfo{ static_cast<GLint>(glGetUniformBlockIndex(_id, uniformBlockName.c_str())) });
 	}
 }
 
@@ -88,6 +101,15 @@ GLint ShaderProgram::getUniformId(const std::string& name) const
 {
 	auto itr = _uniforms.find(name);
 	if (itr == _uniforms.end())
+		return -1;
+
+	return itr->second.id;
+}
+
+GLint ShaderProgram::getUniformBlockId(const std::string& name) const
+{
+	auto itr = _uniformBlocks.find(name);
+	if (itr == _uniformBlocks.end())
 		return -1;
 
 	return itr->second.id;
@@ -142,4 +164,13 @@ void ShaderProgram::setUniform(const std::string& name, const std::vector<glm::v
 		return;
 
 	glUniform3fv(id, static_cast<GLsizei>(v.size()), reinterpret_cast<const GLfloat*>(v.data()));
+}
+
+void ShaderProgram::setUniformBlockBindPoint(const std::string& name, std::size_t bindPoint)
+{
+	auto uniformBlock = getUniformBlockId(name);
+	if (uniformBlock == -1)
+		return;
+
+	glUniformBlockBinding(_id, uniformBlock, static_cast<GLuint>(bindPoint));
 }

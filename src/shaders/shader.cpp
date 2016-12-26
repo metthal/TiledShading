@@ -48,6 +48,8 @@ std::shared_ptr<Shader> Shader::loadFile(const std::string& shaderName, std::str
 		type = GL_VERTEX_SHADER;
 	else if (endsWith(fileName, ".frag"))
 		type = GL_FRAGMENT_SHADER;
+	else if (endsWith(fileName, ".comp"))
+		type = GL_COMPUTE_SHADER;
 	else
 	{
 		error = "Unable to determine type of shader from its extension";

@@ -43,7 +43,9 @@ void Light::setIntensity(const glm::vec3& intensity)
 void Light::setRadius(float radius)
 {
 	_radius = radius;
-	_attenuation = 1.0f / (_radius * _radius) * 10.0f;
+
+	float k = 0.01f;
+	_attenuation = (1.0f - k) / (k * _radius * _radius);
 }
 
 void Light::setVelocity(const glm::vec3& velocity)

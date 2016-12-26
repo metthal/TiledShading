@@ -1,21 +1,33 @@
 #version 430 core
 
+#define MAX_LIGHTS_COUNT 1024
+
+struct Light
+{
+    float attenuation;
+    float radius;
+    vec3 position;
+    vec3 intensity;
+};
+
 uniform vec3 cameraPos;
 uniform sampler2D gbufferPos;
 uniform sampler2D gbufferNormal;
 uniform sampler2D gbufferAlbedo;
 uniform sampler2D gbufferSpecular;
 uniform int lightsCount;
-uniform vec3 lightsPos[64];
-uniform vec3 lightsIntensity[64];
-uniform float lightsAttenuation[64];
+layout(std140) uniform Lights
+{
+    Light lights[MAX_LIGHTS_COUNT];
+};
 
 out vec3 outColor;
 
 float attenuation(vec3 lightPos, vec3 litPos, float lightAttenuation)
 {
     float dist = distance(lightPos, litPos);
-    return 1.0 / (1.0 + lightAttenuation * dist * dist);
+    float ret = 1.0 / (1.0 + lightAttenuation * dist * dist);
+    return ret < 0.015 ? 0.0 : ret;
 }
 
 void main()
@@ -29,15 +41,16 @@ void main()
 
     vec3 cameraDir = normalize(cameraPos - pos);
     outColor = albedo * vec3(0.1, 0.1, 0.1);
+
     for (int i = 0; i < lightsCount; i++)
     {
-        vec3 lightDir = normalize(lightsPos[i] - pos);
+        vec3 lightDir = normalize(lights[i].position - pos);
         vec3 halfway = normalize(cameraDir + normal);
 
-        vec3 diffuseColor = max(0.0, dot(normal, lightDir)) * albedo * lightsIntensity[i];
-        vec3 specularColor = pow(max(0.0, dot(halfway, lightDir)), 64) * specular * lightsIntensity[i];
+        vec3 diffuseColor = max(0.0, dot(normal, lightDir)) * albedo * lights[i].intensity;
+        vec3 specularColor = pow(max(0.0, dot(halfway, lightDir)), 64) * specular * lights[i].intensity;
 
-        float att = attenuation(lightsPos[i], pos, lightsAttenuation[i]);
+        float att = attenuation(lights[i].position, pos, lights[i].attenuation);
         outColor += att * (diffuseColor + specularColor);
     }
 }

@@ -4,6 +4,19 @@
 
 #include "scene/scene.h"
 
+Scene::Scene() : _camera(), _lights(), _objects(), _moveLights(true), _lightsUbo(0)
+{
+	glGenBuffers(1, &_lightsUbo);
+	glBindBuffer(GL_UNIFORM_BUFFER, _lightsUbo);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(LightData) * MaxLights, nullptr, GL_STREAM_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+Scene::~Scene()
+{
+	glDeleteBuffers(1, &_lightsUbo);
+}
+
 std::size_t Scene::getNumberOfLights() const
 {
 	return _lights.size();
@@ -27,6 +40,11 @@ const std::vector<std::shared_ptr<Light>>& Scene::getLights() const
 bool Scene::areLightsMoving() const
 {
 	return _moveLights;
+}
+
+GLuint Scene::getLightsBufferId() const
+{
+	return _lightsUbo;
 }
 
 void Scene::setMoveLights(bool set)
@@ -62,22 +80,42 @@ void Scene::update(std::uint32_t diff)
 	else if (getNumberOfLights() > _newLightsCount)
 		_removeLights();
 
+	glBindBuffer(GL_UNIFORM_BUFFER, _lightsUbo);
+	auto lightsBuffer = static_cast<LightData*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY));
 	if (_moveLights)
 	{
+		std::size_t i = 0;
 		for (const auto& light : _lights)
 		{
 			light->update(diff);
 
 			auto velocity = light->getVelocity();
+			auto position = light->getPosition();
+
 			if (std::fabs(light->getPosition().x) > 10.0f)
+			{
 				velocity = { -velocity.x, velocity.y, velocity.z };
+				position = { light->getPosition().x > 0.0f ? 9.98f : -9.98f , position.y, position.z };
+			}
 
 			if (std::fabs(light->getPosition().z) > 10.0f)
+			{
 				velocity = { velocity.x, velocity.y, -velocity.z };
+				position = { position.x, position.y,  light->getPosition().z > 0.0f ? 9.98f : -9.98f};
+			}
 
 			light->setVelocity(velocity);
+			light->setPosition(position);
+
+			lightsBuffer[i].position = light->getPosition();
+			lightsBuffer[i].intensity = light->getIntensity();
+			lightsBuffer[i].attenuation = light->getAttenuation();
+			lightsBuffer[i].radius = light->getRadius();
+			i++;
 		}
 	}
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Scene::removeLights(std::size_t count)
@@ -99,11 +137,14 @@ void Scene::_generateLights()
 {
 	static std::mt19937 rng(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 	static std::uniform_real_distribution<float> uniform;
-	static std::uniform_real_distribution<float>::param_type position(-10.0f, 10.0f);
+	static std::uniform_real_distribution<float>::param_type position(-9.9f, 9.9f);
 	static std::uniform_real_distribution<float>::param_type color(0.0f, 1.0f);
-	static std::uniform_real_distribution<float>::param_type velocity(3.0f, 5.0f);
+	static std::uniform_real_distribution<float>::param_type radius(2.0f, 7.0f);
+	static std::uniform_real_distribution<float>::param_type velocity(1.0f, 5.0f);
 	static std::discrete_distribution<int> velocityDirection({ 1, 0, 1 });
 
+	glBindBuffer(GL_UNIFORM_BUFFER, _lightsUbo);
+	auto lightsBuffer = static_cast<LightData*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY));
 	for (std::size_t i = getNumberOfLights(); i < _newLightsCount; ++i)
 	{
 		float x = uniform(rng, position);
@@ -113,9 +154,17 @@ void Scene::_generateLights()
 		float b = uniform(rng, color);
 		float vx = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
 		float vz = static_cast<float>(velocityDirection(rng) - 1) * uniform(rng, velocity);
+		float rad = uniform(rng, radius);
 
-		auto light = std::make_shared<Light>(glm::vec3{ x, 0.5f, z }, glm::vec3{ r, g, b }, 3.0f);
+		auto light = std::make_shared<Light>(glm::vec3{ x, 0.5f, z }, glm::vec3{ r, g, b }, rad);
 		light->setVelocity({ vx, 0.0f, vz });
 		addLight(light);
+
+		lightsBuffer[i].position = light->getPosition();
+		lightsBuffer[i].intensity = light->getIntensity();
+		lightsBuffer[i].attenuation = light->getAttenuation();
+		lightsBuffer[i].radius = light->getRadius();
 	}
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

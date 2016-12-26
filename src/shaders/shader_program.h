@@ -21,6 +21,11 @@ struct UniformInfo
 	bool array;
 };
 
+struct UniformBlockInfo
+{
+	GLint id;
+};
+
 class ShaderProgram
 {
 public:
@@ -43,12 +48,15 @@ public:
 	GLint getNumberOfUniforms() const;
 	GLint getAttributeId(const std::string& name) const;
 	GLint getUniformId(const std::string& name) const;
+	GLint getUniformBlockId(const std::string& name) const;
 
 	void setUniform(const std::string& name, GLint value);
 	void setUniform(const std::string& name, const glm::vec3& v);
 	void setUniform(const std::string& name, const glm::mat4& m);
 	void setUniform(const std::string& name, const std::vector<float>& v);
 	void setUniform(const std::string& name, const std::vector<glm::vec3>& v);
+
+	void setUniformBlockBindPoint(const std::string& name, std::size_t bindPoint);
 
 private:
 	static std::shared_ptr<ShaderProgram> linkImpl(GLuint id, std::vector<std::shared_ptr<Shader>>&& shaderPtrs, std::string& error)
@@ -85,9 +93,11 @@ private:
 	GLuint _id;
 	GLint _numAttributes;
 	GLint _numUniforms;
+	GLint _numUniformBlocks;
 	std::vector<std::shared_ptr<Shader>> _shaders;
 	std::unordered_map<std::string, AttributeInfo> _attributes;
 	std::unordered_map<std::string, UniformInfo> _uniforms;
+	std::unordered_map<std::string, UniformBlockInfo> _uniformBlocks;
 };
 
 #endif

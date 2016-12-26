@@ -10,6 +10,7 @@
 #include "mesh/mesh.h"
 #include "window/window.h"
 #include "shaders/deferred_shader_pipeline.h"
+#include "shaders/tiled_deferred_shader_pipeline.h"
 
 const std::uint32_t Width = 1366;
 const std::uint32_t Height = 768;
@@ -24,6 +25,12 @@ int main(int argc, char** argv)
 	std::string error;
 	Window window("PGP - Tiled Shading", Width, Height);
 	if (!window.init(config, error))
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", error.c_str(), nullptr);
+		return 1;
+	}
+
+	if (!window.addPipeline(std::make_shared<TiledDeferredShaderPipeline>(), error))
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", error.c_str(), nullptr);
 		return 1;
@@ -61,7 +68,7 @@ int main(int argc, char** argv)
 	window.getScene()->addObject(bunny4);
 	window.getScene()->addObject(floor);
 
-	window.getScene()->generateLights(64);
+	window.getScene()->generateLights(1024);
 
 	window.gameLoop();
 	return 0;

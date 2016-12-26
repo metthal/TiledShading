@@ -133,8 +133,13 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	{
 		scene->setMoveLights(moveLights);
 	}
+	auto tiled = window->getActivePipelineIndex() == 0;
+	if (ImGui::Checkbox("Tiled", &tiled))
+	{
+		window->switchPipeline(tiled ? 0 : 1);
+	}
 	auto numLights = static_cast<int>(scene->getNumberOfLights());
-	if (ImGui::SliderInt("Lights", &numLights, 1, 64))
+	if (ImGui::SliderInt("Lights", &numLights, 1, MaxLights))
 	{
 		if (numLights < scene->getNumberOfLights())
 			scene->removeLights(scene->getNumberOfLights() - numLights);
