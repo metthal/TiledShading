@@ -62,6 +62,11 @@ GLuint GBuffer::getSpecularId() const
 	return _framebuffer->getAttachmentId(GL_COLOR_ATTACHMENT3);
 }
 
+GLuint GBuffer::getDepthId() const
+{
+	return _framebuffer->getAttachmentId(GL_DEPTH_ATTACHMENT);
+}
+
 GLuint GBuffer::getPositionTextureUnit() const
 {
 	return 0;

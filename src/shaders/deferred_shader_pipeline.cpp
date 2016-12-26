@@ -65,7 +65,7 @@ void DeferredShaderPipeline::run(Window* window, std::uint32_t diff)
 	_gbuffer->activate();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	_geometryPass->activate();
-	_geometryPass->setUniform("viewProject", camera->getViewTransform());
+	_geometryPass->setUniform("viewProject", camera->getViewProjectTransform());
 	for (const auto& object : *scene)
 	{
 		_geometryPass->setUniform("model", object->getTransform());
@@ -104,7 +104,6 @@ void DeferredShaderPipeline::run(Window* window, std::uint32_t diff)
 	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
 	//	0, 0, windowWidthHalf, windowHeightHalf,
 	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	//_gbuffer->deactivate(FramebufferRead);
 	//glReadBuffer(GL_COLOR_ATTACHMENT3);
 	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
 	//	windowWidthHalf, 0, windowSize.x, windowHeightHalf,

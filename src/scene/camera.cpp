@@ -54,7 +54,17 @@ void Camera::setAspectRatio(float aspectRatio)
 
 glm::mat4 Camera::getViewTransform() const
 {
-	return glm::perspective(glm::radians(_fov), _aspectRatio, 0.1f, 1000.0f) * glm::lookAt(_position, _position + _direction, glm::vec3(0.0, 1.0f, 0.0f));
+	return glm::lookAt(_position, _position + _direction, glm::vec3(0.0, 1.0f, 0.0f));
+}
+
+glm::mat4 Camera::getProjectTransform() const
+{
+	return glm::perspective(glm::radians(_fov), _aspectRatio, 0.1f, 1000.0f);
+}
+
+glm::mat4 Camera::getViewProjectTransform() const
+{
+	return getProjectTransform() * getViewTransform();
 }
 
 void Camera::moveForwards(std::uint32_t diff)

@@ -19,6 +19,7 @@ public:
 	GLuint getNormalId() const;
 	GLuint getAlbedoId() const;
 	GLuint getSpecularId() const;
+	GLuint getDepthId() const;
 
 	GLuint getPositionTextureUnit() const;
 	GLuint getNormalTextureUnit() const;

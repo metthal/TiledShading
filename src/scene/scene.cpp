@@ -31,7 +31,7 @@ bool Scene::areLightsMoving() const
 
 void Scene::setMoveLights(bool set)
 {
-	_moveLights = set;
+	_newMoveLights = set;
 }
 
 void Scene::addLight(const std::shared_ptr<Light>& light)
@@ -56,6 +56,12 @@ void Scene::addObject(std::shared_ptr<Object>&& object)
 
 void Scene::update(std::uint32_t diff)
 {
+	_moveLights = _newMoveLights;
+	if (getNumberOfLights() < _newLightsCount)
+		_generateLights();
+	else if (getNumberOfLights() > _newLightsCount)
+		_removeLights();
+
 	if (_moveLights)
 	{
 		for (const auto& light : _lights)
@@ -76,11 +82,20 @@ void Scene::update(std::uint32_t diff)
 
 void Scene::removeLights(std::size_t count)
 {
-	count = std::min(getNumberOfLights(), count);
-	_lights.resize(getNumberOfLights() - count);
+	_newLightsCount = getNumberOfLights() - count;
 }
 
 void Scene::generateLights(std::size_t count)
+{
+	_newLightsCount = getNumberOfLights() + count;
+}
+
+void Scene::_removeLights()
+{
+	_lights.resize(_newLightsCount);
+}
+
+void Scene::_generateLights()
 {
 	static std::mt19937 rng(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 	static std::uniform_real_distribution<float> uniform;
@@ -89,8 +104,7 @@ void Scene::generateLights(std::size_t count)
 	static std::uniform_real_distribution<float>::param_type velocity(3.0f, 5.0f);
 	static std::discrete_distribution<int> velocityDirection({ 1, 0, 1 });
 
-	count = std::min(count, static_cast<std::size_t>(64));
-	for (int i = 0; i < 64; ++i)
+	for (std::size_t i = getNumberOfLights(); i < _newLightsCount; ++i)
 	{
 		float x = uniform(rng, position);
 		float z = uniform(rng, position);

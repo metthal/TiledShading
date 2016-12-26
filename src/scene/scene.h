@@ -36,10 +36,16 @@ public:
 	void generateLights(std::size_t count);
 
 private:
+	void _removeLights();
+	void _generateLights();
+
 	Camera _camera;
 	std::vector<std::shared_ptr<Light>> _lights;
 	std::vector<std::shared_ptr<Object>> _objects;
 	bool _moveLights = true;
+
+	bool _newMoveLights = true;
+	std::size_t _newLightsCount = 0;
 };
 
 #endif

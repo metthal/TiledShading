@@ -46,7 +46,7 @@ FramebufferBuilder& FramebufferBuilder::withDepthBuffer(const glm::ivec2& dimens
 	glGenTextures(1, &textureId);
 
 	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, dimensions.x, dimensions.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, dimensions.x, dimensions.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	_framebuffer->addAttachment(GL_DEPTH_ATTACHMENT, textureId);

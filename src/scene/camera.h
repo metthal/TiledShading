@@ -20,6 +20,8 @@ public:
 	void setAspectRatio(float aspectRatio);
 
 	glm::mat4 getViewTransform() const;
+	glm::mat4 getProjectTransform() const;
+	glm::mat4 getViewProjectTransform() const;
 
 	void moveForwards(std::uint32_t diff);
 	void moveBackwards(std::uint32_t diff);
