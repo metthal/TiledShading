@@ -36,7 +36,11 @@ public:
 	const glm::ivec2& getDimensions() const;
 	Scene* getScene();
 	const Scene* getScene() const;
+	bool hasVsync() const;
 
+	void setVsync(bool set);
+
+	Pipeline* getActivePipeline() const;
 	std::size_t getActivePipelineIndex() const;
 	bool addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string& error);
 	void switchPipeline(std::size_t index);

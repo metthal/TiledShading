@@ -27,7 +27,7 @@ float attenuation(vec3 lightPos, vec3 litPos, float lightAttenuation)
 {
     float dist = distance(lightPos, litPos);
     float ret = 1.0 / (1.0 + lightAttenuation * dist * dist);
-    return ret < 0.015 ? 0.0 : ret;
+    return ret < 0.01 ? 0.0 : ret;
 }
 
 void main()

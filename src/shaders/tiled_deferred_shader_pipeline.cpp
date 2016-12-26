@@ -1,6 +1,8 @@
 #include "shaders/tiled_deferred_shader_pipeline.h"
 #include "window/window.h"
 
+const std::size_t WorkGroupSize = 32;
+
 bool TiledDeferredShaderPipeline::init(const Window* window, std::string& error)
 {
 	_fullScreenQuad = Mesh::load("quad.obj");
@@ -30,6 +32,10 @@ bool TiledDeferredShaderPipeline::init(const Window* window, std::string& error)
 	if (!tileCs)
 		return false;
 
+	auto tileCsDebug = Shader::loadFile("tiled_deferred_shader_light_pass_debug.comp", error);
+	if (!tileCsDebug)
+		return false;
+
 	_geometryPass = ShaderProgram::link(error, geometryVs, geometryFs);
 	if (!_geometryPass)
 		return false;
@@ -40,6 +46,10 @@ bool TiledDeferredShaderPipeline::init(const Window* window, std::string& error)
 
 	_tilePass = ShaderProgram::link(error, tileCs);
 	if (!_tilePass)
+		return false;
+
+	_tilePassDebug = ShaderProgram::link(error, tileCsDebug);
+	if (!_tilePassDebug)
 		return false;
 
 	_gbuffer = std::make_shared<GBuffer>();
@@ -85,43 +95,23 @@ void TiledDeferredShaderPipeline::run(Window* window, std::uint32_t diff)
 		object->getMesh()->render();
 	}
 
-	//_gbuffer->deactivate();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//_gbuffer->activate(FramebufferRead);
-	//glReadBuffer(GL_COLOR_ATTACHMENT0);
-	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
-	//	0, windowHeightHalf, windowWidthHalf, windowSize.y,
-	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	//glReadBuffer(GL_COLOR_ATTACHMENT1);
-	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
-	//	windowWidthHalf, windowHeightHalf, windowSize.x, windowSize.y,
-	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	//glReadBuffer(GL_COLOR_ATTACHMENT2);
-	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
-	//	0, 0, windowWidthHalf, windowHeightHalf,
-	//	GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	//glReadBuffer(GL_DEPTH_ATTACHMENT);
-	//glBlitFramebuffer(0, 0, windowSize.x, windowSize.y,
-	//	windowWidthHalf, 0, windowSize.x, windowHeightHalf,
-	//	GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	//_gbuffer->deactivate(FramebufferRead);
-
 	glDisable(GL_CULL_FACE);
 	_gbuffer->deactivate();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	_tilePass->activate();
+	auto tilePass = isDebug() ? _tilePassDebug : _tilePass;
+	tilePass->activate();
 	_gbuffer->activateTextures();
-	_tilePass->setUniform("cameraPos", camera->getPosition());
-	_tilePass->setUniform("gbufferPos", _gbuffer->getPositionTextureUnit());
-	_tilePass->setUniform("gbufferNormal", _gbuffer->getNormalTextureUnit());
-	_tilePass->setUniform("gbufferAlbedo", _gbuffer->getAlbedoTextureUnit());
-	_tilePass->setUniform("gbufferSpecular", _gbuffer->getSpecularTextureUnit());
-	_tilePass->setUniform("gbufferDepth", _gbuffer->getDepthTextureUnit());
-	_tilePass->setUniform("project", camera->getProjectTransform());
-	_tilePass->setUniform("view", camera->getViewTransform());
-	_tilePass->setUniform("lightsCount", static_cast<GLint>(scene->getNumberOfLights()));
+	tilePass->setUniform("cameraPos", camera->getPosition());
+	tilePass->setUniform("gbufferPos", _gbuffer->getPositionTextureUnit());
+	tilePass->setUniform("gbufferNormal", _gbuffer->getNormalTextureUnit());
+	tilePass->setUniform("gbufferAlbedo", _gbuffer->getAlbedoTextureUnit());
+	tilePass->setUniform("gbufferSpecular", _gbuffer->getSpecularTextureUnit());
+	tilePass->setUniform("gbufferDepth", _gbuffer->getDepthTextureUnit());
+	tilePass->setUniform("project", camera->getProjectTransform());
+	tilePass->setUniform("view", camera->getViewTransform());
+	tilePass->setUniform("lightsCount", static_cast<GLint>(scene->getNumberOfLights()));
 	glBindImageTexture(5, _tiledLights, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glDispatchCompute((1366 / 16) + (1366 % 16), (768 / 16) + (768 % 16), 1);
+	glDispatchCompute((1366 / WorkGroupSize) + (1366 & (WorkGroupSize - 1)), (768 / WorkGroupSize) + (768 & (WorkGroupSize - 1)), 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	_lightPass->activate();

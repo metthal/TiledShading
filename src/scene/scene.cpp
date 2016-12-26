@@ -82,9 +82,9 @@ void Scene::update(std::uint32_t diff)
 
 	glBindBuffer(GL_UNIFORM_BUFFER, _lightsUbo);
 	auto lightsBuffer = static_cast<LightData*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY));
+	std::size_t i = 0;
 	if (_moveLights)
 	{
-		std::size_t i = 0;
 		for (const auto& light : _lights)
 		{
 			light->update(diff);
@@ -107,6 +107,17 @@ void Scene::update(std::uint32_t diff)
 			light->setVelocity(velocity);
 			light->setPosition(position);
 
+			lightsBuffer[i].position = light->getPosition();
+			lightsBuffer[i].intensity = light->getIntensity();
+			lightsBuffer[i].attenuation = light->getAttenuation();
+			lightsBuffer[i].radius = light->getRadius();
+			i++;
+		}
+	}
+	else
+	{
+		for (const auto& light : _lights)
+		{
 			lightsBuffer[i].position = light->getPosition();
 			lightsBuffer[i].intensity = light->getIntensity();
 			lightsBuffer[i].attenuation = light->getAttenuation();
@@ -139,7 +150,7 @@ void Scene::_generateLights()
 	static std::uniform_real_distribution<float> uniform;
 	static std::uniform_real_distribution<float>::param_type position(-9.9f, 9.9f);
 	static std::uniform_real_distribution<float>::param_type color(0.0f, 1.0f);
-	static std::uniform_real_distribution<float>::param_type radius(2.0f, 7.0f);
+	static std::uniform_real_distribution<float>::param_type radius(4.0f, 6.0f);
 	static std::uniform_real_distribution<float>::param_type velocity(1.0f, 5.0f);
 	static std::discrete_distribution<int> velocityDirection({ 1, 0, 1 });
 

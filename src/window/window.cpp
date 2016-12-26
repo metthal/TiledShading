@@ -73,7 +73,7 @@ bool Window::init(const OpenGLConfig& config, std::string& error)
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
 	}
 
-	SDL_GL_SetSwapInterval(0);
+	setVsync(false);
 	glClearColor(config.clearColor.r, config.clearColor.g, config.clearColor.b, 1.0f);
 
 	if (!_imguiPipeline.init(this, error))
@@ -136,9 +136,24 @@ const Scene* Window::getScene() const
 	return _scene.get();
 }
 
+Pipeline* Window::getActivePipeline() const
+{
+	return _pipelines[_currentPipelineIndex].get();
+}
+
 std::size_t Window::getActivePipelineIndex() const
 {
 	return _currentPipelineIndex;
+}
+
+bool Window::hasVsync() const
+{
+	return SDL_GL_GetSwapInterval() == 1;
+}
+
+void Window::setVsync(bool set)
+{
+	SDL_GL_SetSwapInterval(set);
 }
 
 bool Window::addPipeline(const std::shared_ptr<Pipeline>& pipeline, std::string& error)

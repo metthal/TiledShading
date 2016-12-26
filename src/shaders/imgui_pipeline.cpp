@@ -128,6 +128,11 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	ImGui::SetNextWindowSize(ImVec2(200.0f, 300.0f));
 	ImGui::Begin("General");
 	ImGui::Text("%u FPS", static_cast<std::uint32_t>(io.Framerate));
+	auto vsync = window->hasVsync();
+	if (ImGui::Checkbox("V-Sync", &vsync))
+	{
+		window->setVsync(vsync);
+	}
 	auto moveLights = scene->areLightsMoving();
 	if (ImGui::Checkbox("Moving lights", &moveLights))
 	{
@@ -137,6 +142,14 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	if (ImGui::Checkbox("Tiled", &tiled))
 	{
 		window->switchPipeline(tiled ? 0 : 1);
+	}
+	if (window->getActivePipelineIndex() == 0)
+	{
+		auto debug = window->getActivePipeline()->isDebug();
+		if (ImGui::Checkbox("Debug", &debug))
+		{
+			window->getActivePipeline()->setDebug(debug);
+		}
 	}
 	auto numLights = static_cast<int>(scene->getNumberOfLights());
 	if (ImGui::SliderInt("Lights", &numLights, 1, MaxLights))

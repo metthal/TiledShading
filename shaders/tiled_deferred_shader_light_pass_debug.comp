@@ -1,0 +1,103 @@
+#version 430 core
+
+#define WORK_GROUP_SIZE 32
+#define MAX_LIGHTS_COUNT 1024
+
+struct Light
+{
+    float attenuation;
+    float radius;
+    vec3 position;
+    vec3 intensity;
+};
+
+layout(local_size_x = WORK_GROUP_SIZE, local_size_y = WORK_GROUP_SIZE) in;
+
+layout(binding = 5, rgba32f) writeonly uniform image2D color;
+
+uniform bool debug;
+uniform vec3 cameraPos;
+uniform sampler2D gbufferPos;
+uniform sampler2D gbufferNormal;
+uniform sampler2D gbufferAlbedo;
+uniform sampler2D gbufferSpecular;
+uniform sampler2D gbufferDepth;
+uniform mat4 project;
+uniform mat4 view;
+uniform int lightsCount;
+layout(std140) uniform Lights
+{
+    Light lights[MAX_LIGHTS_COUNT];
+};
+
+shared uint minDepthInt = 0xFFFFFFFF;
+shared uint maxDepthInt = 0;
+shared uint activeLightsIndex[MAX_LIGHTS_COUNT];
+shared uint activeLightsCount = 0;
+
+float attenuation(vec3 lightPos, vec3 litPos, float lightAttenuation)
+{
+    float dist = distance(lightPos, litPos);
+    float ret = 1.0 / (1.0 + lightAttenuation * dist * dist);
+    return ret < 0.01 ? 0.0 : ret;
+}
+
+void main()
+{
+    if (gl_LocalInvocationIndex == 0)
+    {
+        minDepthInt = 0xFFFFFFFF;
+        maxDepthInt = 0;
+        activeLightsCount = 0;
+    }
+
+    ivec2 screenSize = textureSize(gbufferDepth, 0);
+    ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);
+    vec2 pixelUv = vec2(pixelPos) / screenSize;
+    vec2 tilePos = vec2(gl_WorkGroupID.xy * gl_WorkGroupSize.xy) / screenSize;
+    
+    vec2 tileScale = vec2(screenSize) / float(2.0 * WORK_GROUP_SIZE);
+    vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
+
+    vec4 c1 = vec4(-project[0][0] * tileScale.x, 0.0f, tileBias.x, 0.0f);
+    vec4 c2 = vec4(0.0f, -project[1][1] * tileScale.y, tileBias.y, 0.0f);
+    vec4 c4 = vec4(0.0f, 0.0f, 1.0f, 0.0f);
+    
+    vec4 frustumPlanes[4];
+    frustumPlanes[0] = normalize(c4 - c1); // Right
+    frustumPlanes[1] = normalize(c4 + c1); // Left
+    frustumPlanes[2] = normalize(c4 - c2); // Bottom
+    frustumPlanes[3] = normalize(c4 + c2); // Top
+
+    barrier();
+
+    uint threadCount = WORK_GROUP_SIZE * WORK_GROUP_SIZE;
+    uint passCount = 1 + ((lightsCount - 1) / threadCount);
+    for (uint passIt = 0; passIt < passCount; ++passIt)
+    {
+        uint lightIndex =  passIt * threadCount + gl_LocalInvocationIndex;
+        if (lightIndex < lightsCount)
+        {
+            vec4 pos = view * vec4(lights[lightIndex].position, 1.0f);
+            float rad = lights[lightIndex].radius;
+
+            bool inFrustum = true;
+            for (uint i = 0; i < 4; i++)
+            {
+                float dist = dot(frustumPlanes[i], pos);
+                inFrustum = inFrustum && (dist >= -rad);
+            }
+
+            if (inFrustum)
+            {
+                uint id = atomicAdd(activeLightsCount, 1);
+                activeLightsIndex[id] = lightIndex;
+            }
+        }
+    }
+    
+    barrier();
+    
+    vec4 pixelColor = vec4(float(activeLightsCount) / float(lightsCount), float(activeLightsCount) / float(lightsCount), float(activeLightsCount) / float(lightsCount), 1);
+    imageStore(color, pixelPos, pixelColor);
+}

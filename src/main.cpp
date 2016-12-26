@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	auto floor = std::make_shared<Object>(glm::vec3{ 0.0f, 0.0f, 0.0f }, floorMesh);
 	floor->setScale(10.0f);
 
-	window.getScene()->getCamera()->setPosition({ 0.0f, 5.0f, 10.0f });
+	window.getScene()->getCamera()->setPosition({ 0.0f, 9.0f, 18.0f });
 	window.getScene()->getCamera()->lookAt({ 0.0f, 0.0f, 0.0f });
 	window.getScene()->getCamera()->setFieldOfView(45.0f);
 	window.getScene()->getCamera()->setAspectRatio(Width, Height);
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 	window.getScene()->addObject(bunny4);
 	window.getScene()->addObject(floor);
 
-	window.getScene()->generateLights(1024);
+	window.getScene()->generateLights(512);
 
 	window.gameLoop();
 	return 0;

@@ -20,6 +20,7 @@ private:
 	std::shared_ptr<ShaderProgram> _geometryPass;
 	std::shared_ptr<ShaderProgram> _lightPass;
 	std::shared_ptr<ShaderProgram> _tilePass;
+	std::shared_ptr<ShaderProgram> _tilePassDebug;
 	std::shared_ptr<Mesh> _fullScreenQuad;
 	GLuint _tiledLights;
 };
