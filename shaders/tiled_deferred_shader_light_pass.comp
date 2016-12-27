@@ -29,8 +29,6 @@ layout(std140) uniform Lights
     Light lights[MAX_LIGHTS_COUNT];
 };
 
-shared uint minDepthInt = 0xFFFFFFFF;
-shared uint maxDepthInt = 0;
 shared uint activeLightsIndex[MAX_LIGHTS_COUNT];
 shared uint activeLightsCount = 0;
 
@@ -44,11 +42,7 @@ float attenuation(vec3 lightPos, vec3 litPos, float lightAttenuation)
 void main()
 {
     if (gl_LocalInvocationIndex == 0)
-    {
-        minDepthInt = 0xFFFFFFFF;
-        maxDepthInt = 0;
         activeLightsCount = 0;
-    }
 
     ivec2 screenSize = textureSize(gbufferDepth, 0);
     ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);

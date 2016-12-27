@@ -125,9 +125,9 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	ImGui::NewFrame();
 
 	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-	ImGui::SetNextWindowSize(ImVec2(200.0f, 300.0f));
+	ImGui::SetNextWindowSize(ImVec2(240.0f, 300.0f));
 	ImGui::Begin("General");
-	ImGui::Text("%u FPS", static_cast<std::uint32_t>(io.Framerate));
+	ImGui::Text("%u FPS (%u ms since last frame)", static_cast<std::uint32_t>(io.Framerate), diff);
 	auto vsync = window->hasVsync();
 	if (ImGui::Checkbox("V-Sync", &vsync))
 	{
@@ -162,7 +162,7 @@ void ImguiPipeline::run(Window* window, std::uint32_t diff)
 	ImGui::End();
 
 	ImGui::SetNextWindowPos(ImVec2(windowSize.x - 300.0f, 0.0f));
-	ImGui::SetNextWindowSize(ImVec2(300.0f, 500.0f));
+	ImGui::SetNextWindowSize(ImVec2(300.0f, windowSize.y));
 	ImGui::Begin("Lights");
 	std::stringstream ss;
 	for (std::size_t i = 0; i < lights.size(); ++i)
@@ -240,8 +240,11 @@ void ImguiPipeline::handleEvent(const SDL_Event& event) const
 			io.MouseDown[1] = event.button.button == SDL_BUTTON_RIGHT;
 			break;
 		case SDL_MOUSEBUTTONUP:
-			io.MouseDown[0] = io.MouseDown[0] ? !(event.button.button == SDL_BUTTON_LEFT) : false;
-			io.MouseDown[1] = io.MouseDown[1] ? !(event.button.button == SDL_BUTTON_RIGHT) : false;
+			io.MouseDown[0] = io.MouseDown[0] && !(event.button.button == SDL_BUTTON_LEFT);
+			io.MouseDown[1] = io.MouseDown[1] && !(event.button.button == SDL_BUTTON_RIGHT);
+			break;
+		case SDL_MOUSEWHEEL:
+			io.MouseWheel = static_cast<float>(event.wheel.y);
 			break;
 		default:
 			break;

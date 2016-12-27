@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 	window.getScene()->addObject(bunny4);
 	window.getScene()->addObject(floor);
 
-	window.getScene()->generateLights(512);
+	window.getScene()->generateLights(32);
 
 	window.gameLoop();
 	return 0;
